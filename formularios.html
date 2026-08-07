@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Formulários · Residência em Neurologia HULW/UFPB</title>
+<meta name="description" content="Emissão de formulários em PDF da Residência Médica em Neurologia do HULW/UFPB.">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<header class="topo">
+  <div class="container">
+    <div>
+      <h1>Residência Médica em Neurologia</h1>
+      <p>Hospital Universitário Lauro Wanderley · UFPB</p>
+    </div>
+    <nav>
+      <a href="index.html">Início</a>
+      <a href="formularios.html" aria-current="page">Formulários</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <p class="trilha"><a href="index.html">Início</a> › Formulários</p>
+  <h2>Emitir formulários</h2>
+  <p class="sub">Preencha a identificação do paciente uma vez e marque quantos documentos quiser emitir. Os PDFs são montados no seu navegador; nenhum dado é enviado para a internet.</p>
+
+  <p class="fixo">
+    Estabelecimento solicitante e executante preenchidos automaticamente:
+    <strong>HOSPITAL UNIVERSITÁRIO LAURO WANDERLEY</strong> · CNES <strong>2400243</strong>
+  </p>
+
+  <form id="form-emissao" novalidate>
+
+    <fieldset class="bloco" id="bloco-paciente">
+      <legend>Identificação do paciente</legend>
+      <div class="grade">
+
+        <div class="campo c9">
+          <label for="nome">Nome do paciente</label>
+          <input id="nome" name="nome" type="text" autocomplete="off" maxlength="70" required>
+          <span class="msg">Informe o nome do paciente.</span>
+        </div>
+
+        <div class="campo c3">
+          <label for="prontuario">Nº do prontuário</label>
+          <input id="prontuario" name="prontuario" type="text" inputmode="numeric" autocomplete="off" maxlength="15">
+        </div>
+
+        <div class="campo c5">
+          <label for="cns">Cartão Nacional de Saúde (CNS)</label>
+          <input id="cns" name="cns" type="text" inputmode="numeric" autocomplete="off" data-mascara="cns" placeholder="000 0000 0000 0000">
+          <span class="dica">15 dígitos</span>
+          <span class="msg">O CNS deve ter 15 dígitos.</span>
+        </div>
+
+        <div class="campo c4">
+          <label for="cpf">CPF <span class="opcional">(opcional)</span></label>
+          <input id="cpf" name="cpf" type="text" inputmode="numeric" autocomplete="off" data-mascara="cpf" placeholder="000.000.000-00">
+          <span class="dica">Sai ao lado do nome no receituário de controle especial.</span>
+          <span class="msg">O CPF deve ter 11 dígitos.</span>
+        </div>
+
+        <div class="campo c4">
+          <label for="nascimento">Data de nascimento</label>
+          <input id="nascimento" name="nascimento" type="text" inputmode="numeric" autocomplete="off" data-mascara="data" placeholder="dd/mm/aaaa">
+          <span class="msg">Data inválida.</span>
+        </div>
+
+        <div class="campo c3">
+          <label>Sexo</label>
+          <div class="opcoes">
+            <label><input type="radio" name="sexo" value="1"> Masculino</label>
+            <label><input type="radio" name="sexo" value="3"> Feminino</label>
+          </div>
+        </div>
+
+        <div class="campo c8">
+          <label for="mae">Nome da mãe ou responsável</label>
+          <input id="mae" name="mae" type="text" autocomplete="off" maxlength="60">
+        </div>
+
+        <div class="campo c4">
+          <label for="telefone">Telefone de contato</label>
+          <input id="telefone" name="telefone" type="text" inputmode="tel" autocomplete="off" data-mascara="telefone" placeholder="(00) 00000-0000">
+        </div>
+
+        <div class="campo c12">
+          <label for="endereco">Endereço (rua, nº, bairro)</label>
+          <input id="endereco" name="endereco" type="text" autocomplete="off" maxlength="90">
+        </div>
+
+        <div class="campo c7">
+          <label for="municipio">Município de residência</label>
+          <input id="municipio" name="municipio" type="text" autocomplete="off" maxlength="50">
+        </div>
+
+        <div class="campo c2">
+          <label for="uf">UF</label>
+          <input id="uf" name="uf" type="text" autocomplete="off" data-mascara="uf" maxlength="2" placeholder="PB">
+        </div>
+
+        <div class="campo c3">
+          <label for="cep">CEP</label>
+          <input id="cep" name="cep" type="text" inputmode="numeric" autocomplete="off" data-mascara="cep" placeholder="00000-000">
+          <span class="msg">O CEP deve ter 8 dígitos.</span>
+        </div>
+
+      </div>
+    </fieldset>
+
+    <fieldset class="bloco">
+      <legend>Profissional solicitante</legend>
+      <p class="nota">Estes dados ficam salvos neste navegador e já vêm preenchidos da próxima vez. Nada do paciente é gravado.</p>
+      <div class="grade">
+
+        <div class="campo c8">
+          <label for="profissional">Nome do profissional solicitante</label>
+          <input id="profissional" name="profissional" type="text" autocomplete="off" maxlength="70" required>
+          <span class="msg">Informe o nome do profissional.</span>
+        </div>
+
+        <div class="campo c4">
+          <label for="dataSolicitacao">Data da solicitação</label>
+          <input id="dataSolicitacao" name="dataSolicitacao" type="text" inputmode="numeric" autocomplete="off" data-mascara="data" placeholder="dd/mm/aaaa">
+          <span class="msg">Data inválida.</span>
+        </div>
+
+        <div class="campo c4">
+          <label>Documento</label>
+          <div class="opcoes">
+            <label><input type="radio" name="tipoDoc" value="CNS" checked> CNS</label>
+            <label><input type="radio" name="tipoDoc" value="CPF"> CPF</label>
+          </div>
+        </div>
+
+        <div class="campo c8">
+          <label for="numeroDoc">Nº do documento do profissional</label>
+          <input id="numeroDoc" name="numeroDoc" type="text" inputmode="numeric" autocomplete="off" data-mascara="doc">
+          <span class="dica" id="dicaDoc">15 dígitos</span>
+          <span class="msg">Número de documento incompleto.</span>
+        </div>
+
+      </div>
+    </fieldset>
+
+    <h3 class="titulo-secao">Documentos a emitir</h3>
+    <p class="sub">Marque os que quiser gerar para este paciente e preencha os campos próprios de cada um.</p>
+
+    <div id="documentos"></div>
+
+    <div class="bloco" id="saida" hidden>
+      <div class="campo">
+        <label>Como entregar os arquivos</label>
+        <div class="opcoes">
+          <label><input type="radio" name="saida" value="unico" checked> Um PDF único com todos</label>
+          <label><input type="radio" name="saida" value="separado"> Um PDF por documento</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="acoes">
+      <button type="submit" class="btn-primario" id="btn-gerar">Gerar documento</button>
+      <button type="button" class="btn-secundario" id="btn-limpar-paciente">Limpar paciente e documentos</button>
+    </div>
+
+    <p class="aviso" id="aviso"></p>
+
+  </form>
+</main>
+
+<footer>
+  <div class="container">
+    Residência Médica em Neurologia · HULW/UFPB · CNES 2400243
+  </div>
+</footer>
+
+<script src="assets/js/pdf-comum.js"></script>
+<script src="assets/js/doc-mudanca-procedimento.js"></script>
+<script src="assets/js/doc-apac.js"></script>
+<script src="assets/js/doc-requisicao-exames.js"></script>
+<script src="assets/js/doc-receituario-simples.js"></script>
+<script src="assets/js/doc-receituario-controle-especial.js"></script>
+<script src="assets/js/emitir.js"></script>
+</body>
+</html>

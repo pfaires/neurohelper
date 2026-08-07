@@ -1,0 +1,20 @@
+# Python (ferramentas/gerar-modelos.py)
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editores
+.vscode/
+.idea/
+*.swp
+
+# PDFs gerados a partir de dados reais nunca devem ser versionados
+/saida/
+*-preenchido.pdf
+exemplo-*.pdf

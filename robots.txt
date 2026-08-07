@@ -1,0 +1,5 @@
+# Site de uso interno da Residência em Neurologia do HULW/UFPB.
+# Não deve ser rastreado nem indexado por buscadores.
+
+User-agent: *
+Disallow: /

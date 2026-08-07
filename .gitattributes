@@ -1,0 +1,13 @@
+# Normalização de fim de linha
+* text=auto eol=lf
+
+# Scripts que dependem do fim de linha do sistema
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.sh  text eol=lf
+
+# Binários
+*.pdf binary
+*.png binary
+*.jpg binary
+*.ico binary
