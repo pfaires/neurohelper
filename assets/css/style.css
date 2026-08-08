@@ -138,6 +138,68 @@ h2 { font-size: 1.4rem; margin: 0 0 8px; }
   .c2, .c3, .c4, .c5, .c6, .c7, .c8, .c9, .c12 { grid-column: span 4; }
 }
 
+/* barra de ação dentro de um bloco (importar do AGHU) */
+.barra-bloco {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin: 0 0 16px;
+}
+
+.btn-mini {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: .82rem;
+  font-weight: 600;
+  padding: 7px 13px;
+  border: 1px solid var(--borda);
+  border-radius: 6px;
+  background: var(--branco);
+  color: var(--azul);
+}
+.btn-mini svg { width: 14px; height: 14px; flex: none; }
+.btn-mini:hover { border-color: var(--azul-claro); background: var(--azul-fundo); }
+
+.retorno { font-size: .8rem; color: var(--cinza); }
+.retorno.ok { color: #14532d; }
+.retorno.falha { color: var(--erro); }
+
+/* caixa de colagem manual */
+.dialogo {
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  padding: 22px 24px 24px;
+  max-width: 560px;
+  width: calc(100% - 32px);
+  color: var(--texto);
+  background: var(--branco);
+}
+.dialogo::backdrop { background: rgba(11, 79, 108, .35); }
+.dialogo h3 { margin: 0 0 8px; font-size: 1.05rem; color: var(--azul); }
+.dialogo p { margin: 0 0 14px; font-size: .87rem; color: var(--cinza); }
+.dialogo textarea {
+  width: 100%;
+  font: inherit;
+  font-size: .85rem;
+  padding: 10px 12px;
+  border: 1px solid var(--borda);
+  border-radius: 6px;
+  resize: vertical;
+}
+.dialogo textarea:focus { outline: 2px solid var(--azul-claro); outline-offset: -1px; }
+.dialogo .aviso { margin: 12px 0 0; }
+.dialogo .acoes { margin-top: 16px; }
+.dialogo kbd {
+  font: inherit;
+  font-size: .78rem;
+  background: var(--azul-fundo);
+  border: 1px solid var(--borda);
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+
 .nota {
   margin: -4px 0 16px;
   font-size: .8rem;

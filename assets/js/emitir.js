@@ -243,6 +243,74 @@
     aviso.innerHTML = html;
   }
 
+  // -------------------------------------------------- importação do AGHU
+
+  var dlg = $('#dlg-aghu');
+  var retorno = $('#retorno-aghu');
+
+  function retornoAGHU(tipo, texto) {
+    retorno.className = 'retorno ' + tipo;
+    retorno.textContent = texto;
+  }
+
+  /* Aplica os campos reconhecidos. Só toca no que veio no texto colado —
+     o que já estava preenchido e não veio do AGHU permanece. */
+  function aplicarAGHU(texto) {
+    var r = L.lerAGHU(texto);
+    if (!r.achados.length) return 0;
+
+    Object.keys(r.campos).forEach(function (chave) {
+      if (chave === 'sexo') {
+        $$('input[name="sexo"]').forEach(function (rd) {
+          rd.checked = rd.value === r.campos.sexo;
+        });
+        return;
+      }
+      var el = $('#' + chave);
+      if (!el) return;
+      el.value = r.campos[chave];
+      var c = el.closest('.campo');
+      if (c) c.classList.remove('erro');
+    });
+
+    retornoAGHU('ok', r.achados.length + ' campos importados: ' + r.achados.join(', ') + '.');
+    return r.achados.length;
+  }
+
+  function abrirDialogo(texto) {
+    $('#txt-aghu').value = texto || '';
+    $('#aviso-aghu').className = 'aviso';
+    if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
+    $('#txt-aghu').focus();
+  }
+
+  $('#btn-importar').addEventListener('click', function () {
+    retornoAGHU('', '');
+    if (navigator.clipboard && navigator.clipboard.readText) {
+      navigator.clipboard.readText().then(function (t) {
+        // sem permissão de leitura ou nada reconhecido: cai para a colagem manual
+        if (!aplicarAGHU(t)) abrirDialogo(t);
+      }).catch(function () { abrirDialogo(''); });
+    } else {
+      abrirDialogo('');
+    }
+  });
+
+  $('#btn-aghu-importar').addEventListener('click', function () {
+    if (aplicarAGHU($('#txt-aghu').value)) {
+      if (dlg.close) dlg.close(); else dlg.removeAttribute('open');
+      $('#bloco-paciente').scrollIntoView({ block: 'start', behavior: 'smooth' });
+    } else {
+      $('#aviso-aghu').className = 'aviso falha';
+      $('#aviso-aghu').textContent = 'Não reconheci nenhum dado de paciente nesse texto. ' +
+        'Confira se a cópia foi feita na aba Dados Pessoais do POL.';
+    }
+  });
+
+  $('#btn-aghu-fechar').addEventListener('click', function () {
+    if (dlg.close) dlg.close(); else dlg.removeAttribute('open');
+  });
+
   // -------------------------------------------------------------- eventos
 
   form.addEventListener('submit', function (ev) {
@@ -316,6 +384,7 @@
     });
     $$('.campo.erro').forEach(function (c) { c.classList.remove('erro'); });
     aviso.className = 'aviso';
+    retornoAGHU('', '');
     $('#nome').focus();
   });
 

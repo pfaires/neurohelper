@@ -111,6 +111,25 @@ identificação do comprador e do fornecedor ficam em branco, para preenchimento
 
 Os demais campos ficam em branco para preenchimento manual.
 
+### Importação do AGHU
+
+O botão **Importar do AGHU**, na identificação do paciente, lê os dados copiados da aba
+**POL → Dados Pessoais**. Basta selecionar tudo na tela do AGHU (`Ctrl+A`), copiar (`Ctrl+C`)
+e clicar no botão.
+
+O leitor (`assets/js/aghu.js`) interpreta o formato do AGHU — pares rótulo/valor em linhas
+alternadas — e é tolerante a variações: linhas em branco a mais ou a menos, campos vazios,
+acentuação perdida, caixa alta ou baixa, `Rótulo: valor` e `Rótulo<TAB>valor` na mesma
+linha, e lixo em volta (cabeçalho e rodapé da página). A ordem dos campos não importa.
+
+Preenche nome, prontuário, CNS, CPF, nascimento, sexo, nome da mãe, telefone, endereço
+(logradouro, número, complemento e bairro reunidos), município, UF e CEP. Só altera os
+campos encontrados no texto colado; o resto permanece como estava.
+
+Quando o navegador permite ler a área de transferência, a importação é direta. Quando não
+permite — Firefox, ou permissão negada no Chrome —, abre uma caixa para colar o texto com
+`Ctrl+V`. Para acrescentar rótulos novos, edite os mapas `ALVOS` e `IGNORAR` em `aghu.js`.
+
 ### Dados guardados no navegador
 
 Apenas nome, tipo e número do documento do **profissional solicitante** ficam salvos
