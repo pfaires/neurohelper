@@ -3,45 +3,48 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Residência em Neurologia · HULW/UFPB</title>
-<meta name="description" content="Recursos e formulários da Residência Médica em Neurologia do Hospital Universitário Lauro Wanderley / UFPB.">
+<title>NeuroHelper · Residência em Neurologia HULW/UFPB</title>
+<meta name="description" content="Emissão de documentos da Residência Médica em Neurologia do Hospital Universitário Lauro Wanderley / UFPB.">
 <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
 <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
 
-<header class="topo">
-  <div class="container">
-    <div>
-      <h1>Residência Médica em Neurologia</h1>
-      <p>Hospital Universitário Lauro Wanderley · UFPB</p>
-    </div>
-    <nav>
-      <a href="index.html" aria-current="page">Início</a>
-      <a href="formularios.html">Formulários</a>
-    </nav>
-  </div>
-</header>
+<div id="cabecalho"></div>
 
 <main class="container">
-  <h2>Bem-vindo</h2>
-  <p class="sub">Área de apoio à Residência Médica em Neurologia do HULW/UFPB.</p>
+  <h2>Documentos da residência, num lugar só</h2>
+  <p class="sub">Identifique o paciente uma vez, gere quantos documentos precisar e imprima tudo de uma vez. Todo o processamento acontece neste navegador; nenhum dado é enviado para a internet.</p>
 
+  <div id="acao-principal"></div>
+
+  <h3 class="titulo-secao">Ambulatórios</h3>
+  <ul class="cartoes" id="lista-ambulatorios"></ul>
+
+  <h3 class="titulo-secao">Configuração</h3>
   <ul class="cartoes">
     <li>
-      <a class="cartao" href="formularios.html">
-        <h3>Formulários</h3>
-        <p>Preencha a identificação do paciente uma vez e gere em PDF quantos documentos precisar.</p>
+      <a class="cartao" href="prescritor.html">
+        <h3>Prescritores</h3>
+        <p>Cadastro dos médicos deste computador. Escolha quem está prescrevendo nesta sessão.</p>
+      </a>
+    </li>
+    <li>
+      <a class="cartao" href="kit-editor.html">
+        <h3>Editor de kits</h3>
+        <p>Criar e ajustar os conjuntos de documentos que aparecem nos ambulatórios.</p>
       </a>
     </li>
   </ul>
 </main>
 
-<footer>
-  <div class="container">
-    Residência Médica em Neurologia · HULW/UFPB · CNES 2400243
-  </div>
-</footer>
+<div id="rodape"></div>
 
+<script src="assets/js/pdf-comum.js"></script>
+<script src="assets/js/campos.js"></script>
+<script src="assets/js/armazenamento.js"></script>
+<script src="assets/js/cabecalho.js"></script>
+<script src="assets/js/ambulatorios.js"></script>
+<script src="assets/js/pag-inicio.js"></script>
 </body>
 </html>

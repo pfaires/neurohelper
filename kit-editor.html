@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Editor de kits · NeuroHelper</title>
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<div id="cabecalho"></div>
+
+<main class="container">
+  <p class="trilha"><a href="index.html">Início</a> › Editor de kits</p>
+  <h2>Editor de kits</h2>
+  <p class="sub">O que você salvar vale imediatamente neste computador. Para publicar para a residência inteira, exporte o <code>kits.json</code> e substitua o arquivo em <code>assets/dados/</code> no repositório.</p>
+
+  <div id="lista-kits"></div>
+
+  <div class="acoes" id="acoes-lista">
+    <button type="button" class="btn-primario" id="btn-novo">Novo kit</button>
+    <button type="button" class="btn-secundario" id="btn-exportar">Exportar kits.json</button>
+    <button type="button" class="btn-secundario" id="btn-importar">Importar kits.json</button>
+    <input type="file" id="arquivo-importar" accept=".json,application/json" hidden>
+  </div>
+
+  <p class="aviso" id="aviso-lista"></p>
+
+  <form id="form-kit" novalidate hidden>
+    <fieldset class="bloco">
+      <legend id="legenda-kit">Novo kit</legend>
+      <div class="grade">
+        <div class="campo c7">
+          <label for="k-titulo">Título do kit</label>
+          <input type="text" id="k-titulo" autocomplete="off" maxlength="70">
+          <span class="msg">Informe o título.</span>
+        </div>
+        <div class="campo c5">
+          <label for="k-ambulatorio">Ambulatório</label>
+          <select id="k-ambulatorio"></select>
+        </div>
+        <div class="campo c12">
+          <label for="k-descricao">Descrição</label>
+          <input type="text" id="k-descricao" autocomplete="off" maxlength="140">
+        </div>
+        <div class="campo c12">
+          <label for="k-id">Identificador</label>
+          <input type="text" id="k-id" autocomplete="off" maxlength="40">
+          <span class="dica">Gerado a partir do título. Só mude se souber o que está fazendo — é ele que liga o kit ao ambulatório e ao arquivo publicado.</span>
+          <span class="msg">Identificador já usado por outro kit.</span>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset class="bloco">
+      <legend>Dado comum aos documentos</legend>
+      <p class="nota">Um texto único que o usuário preenche uma vez e que entra em vários documentos do kit — tipicamente o resumo clínico.</p>
+      <div class="grade">
+        <div class="campo c12">
+          <label class="opcao-caixa" style="padding-top:0">
+            <input type="checkbox" id="cc-usar"> Este kit tem um campo comum
+          </label>
+        </div>
+      </div>
+      <div id="cc-corpo" hidden>
+        <div class="grade">
+          <div class="campo c6">
+            <label for="cc-rotulo">Rótulo do campo</label>
+            <input type="text" id="cc-rotulo" autocomplete="off" maxlength="60">
+          </div>
+          <div class="campo c6">
+            <label for="cc-dica">Dica exibida abaixo do campo</label>
+            <input type="text" id="cc-dica" autocomplete="off" maxlength="140">
+          </div>
+          <div class="campo c12">
+            <label for="cc-valor">Texto padrão</label>
+            <textarea id="cc-valor" rows="4" maxlength="800"></textarea>
+          </div>
+          <div class="campo c12">
+            <label>Preenche estes campos dos documentos</label>
+            <div class="opcoes opcoes-quebra" id="cc-destinos"></div>
+            <span class="dica">Quando o item já traz texto próprio no campo, o comum entra depois, separado por linha em branco.</span>
+          </div>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset class="bloco">
+      <legend>Documentos do kit</legend>
+      <div id="itens"></div>
+      <div class="barra-bloco" style="margin:16px 0 0">
+        <select id="novo-tipo"></select>
+        <button type="button" class="btn-mini" id="btn-add-item">Acrescentar documento</button>
+      </div>
+    </fieldset>
+
+    <div class="acoes">
+      <button type="submit" class="btn-primario" id="btn-salvar">Salvar kit</button>
+      <button type="button" class="btn-secundario" id="btn-fechar">Fechar sem salvar</button>
+      <button type="button" class="btn-perigo" id="btn-excluir" hidden>Excluir</button>
+      <button type="button" class="btn-perigo" id="btn-restaurar" hidden>Restaurar original</button>
+    </div>
+
+    <p class="aviso" id="aviso"></p>
+  </form>
+</main>
+
+<div id="rodape"></div>
+
+<script src="assets/js/pdf-comum.js"></script>
+<script src="assets/js/campos.js"></script>
+<script src="assets/js/armazenamento.js"></script>
+<script src="assets/js/cabecalho.js"></script>
+<script src="assets/js/doc-mudanca-procedimento.js"></script>
+<script src="assets/js/doc-apac.js"></script>
+<script src="assets/js/doc-requisicao-exames.js"></script>
+<script src="assets/js/doc-receituario-simples.js"></script>
+<script src="assets/js/doc-receituario-controle-especial.js"></script>
+<script src="assets/js/kits.js"></script>
+<script src="assets/js/ambulatorios.js"></script>
+<script src="assets/js/pag-kit-editor.js"></script>
+</body>
+</html>

@@ -17,6 +17,11 @@
     titulo: 'Receituário simples',
     descricao: 'Receita de uso comum, sem retenção. Meia página (A5 retrato).',
     modelo: 'assets/pdf/receituario-simples.pdf',
+    folha: 'a5-retrato',
+    tituloPadrao: function (d) {
+      var primeira = String(d.prescricao || '').split('\n')[0].trim();
+      return primeira || 'Receituário simples';
+    },
 
     campos: [
       { id: 'prescricao', rotulo: 'Prescrição', tipo: 'area', larg: 12,

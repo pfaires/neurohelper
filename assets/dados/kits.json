@@ -1,0 +1,84 @@
+[
+  {
+    "id": "desmielinizante",
+    "ambulatorio": "geral",
+    "titulo": "Investigação de doença desmielinizante",
+    "descricao": "Ressonâncias de crânio, órbitas e coluna, laudo da APAC e painel laboratorial.",
+    "camposComuns": [
+      {
+        "id": "resumo",
+        "rotulo": "Resumo clínico",
+        "tipo": "area",
+        "larg": 12,
+        "linhas": 4,
+        "max": 800,
+        "dica": "Vai para a justificativa das mudanças de procedimento e para os dados clínicos da requisição.",
+        "aplicaEm": [
+          "justificativa",
+          "dadosClinicos",
+          "observacoes"
+        ],
+        "valor": "Paciente em investigação de doença desmielinizante do sistema nervoso central. Solicita-se estudo por ressonância magnética para avaliação de disseminação no espaço e no tempo, conforme critérios diagnósticos vigentes."
+      }
+    ],
+    "itens": [
+      {
+        "id": "rm-cranio",
+        "documento": "mudanca-procedimento",
+        "titulo": "RM de crânio",
+        "marcado": true,
+        "valores": {
+          "procedimento": "RESSONANCIA MAGNETICA DE CRANIO COM E SEM CONTRASTE"
+        }
+      },
+      {
+        "id": "rm-orbitas",
+        "documento": "mudanca-procedimento",
+        "titulo": "RM de órbitas",
+        "marcado": true,
+        "valores": {
+          "procedimento": "RESSONANCIA MAGNETICA DE ORBITAS COM E SEM CONTRASTE"
+        }
+      },
+      {
+        "id": "rm-cervical",
+        "documento": "mudanca-procedimento",
+        "titulo": "RM de coluna cervical",
+        "marcado": true,
+        "valores": {
+          "procedimento": "RESSONANCIA MAGNETICA DE COLUNA CERVICAL COM E SEM CONTRASTE"
+        }
+      },
+      {
+        "id": "rm-dorsal",
+        "documento": "mudanca-procedimento",
+        "titulo": "RM de coluna dorsal",
+        "marcado": true,
+        "valores": {
+          "procedimento": "RESSONANCIA MAGNETICA DE COLUNA TORACICA COM E SEM CONTRASTE"
+        }
+      },
+      {
+        "id": "apac-imagem",
+        "documento": "apac",
+        "titulo": "APAC — ressonância magnética",
+        "marcado": false,
+        "valores": {
+          "procedimento": "RESSONANCIA MAGNETICA DE CRANIO COM E SEM CONTRASTE",
+          "quantidade": "1",
+          "diagnostico": "DOENCA DESMIELINIZANTE EM INVESTIGACAO"
+        }
+      },
+      {
+        "id": "laboratorio",
+        "documento": "requisicao-exames",
+        "titulo": "Painel laboratorial",
+        "marcado": true,
+        "valores": {
+          "material": "Sangue total e soro",
+          "exames": "Hemograma completo\nVHS e proteina C reativa\nTSH e T4 livre\nVitamina B12 e acido folico\nFAN, anti-Ro/SSA e anti-La/SSB\nEnzima conversora de angiotensina (ECA)\nSorologias: HIV, VDRL, hepatites B e C\nAnti-aquaporina 4 (AQP4-IgG)\nAnti-MOG"
+        }
+      }
+    ]
+  }
+]

@@ -9,14 +9,14 @@
     {
       paciente:   { x: 58.4, y: 441.0, w: 342.6 },
       endereco:   { x: 61.5, y: 419.0, w: 339.5 },
-      data:       { x: 44.1, y: 175.0, w: 141.9 },
-      prescricao: [18, 196, 403, 402]
+      data:       { x: 44.1, y: 183.0, w: 141.9 },
+      prescricao: [18, 258, 403, 402]
     },
     {
       paciente:   { x: 479.4, y: 441.0, w: 342.6 },
       endereco:   { x: 482.5, y: 419.0, w: 339.5 },
-      data:       { x: 465.1, y: 175.0, w: 141.9 },
-      prescricao: [439, 196, 824, 402]
+      data:       { x: 465.1, y: 183.0, w: 141.9 },
+      prescricao: [439, 258, 824, 402]
     }
   ];
 
@@ -25,6 +25,11 @@
     titulo: 'Receituário de controle especial',
     descricao: 'Receita em duas vias lado a lado (retenção da farmácia e orientação ao paciente), conforme a Portaria SVS/MS 344/98. Página A4 paisagem.',
     modelo: 'assets/pdf/receituario-controle-especial.pdf',
+    folha: 'a4-paisagem',
+    tituloPadrao: function (d) {
+      var primeira = String(d.prescricao || '').split('\n')[0].trim();
+      return primeira || 'Receituário de controle especial';
+    },
 
     campos: [
       { id: 'prescricao', rotulo: 'Prescrição', tipo: 'area', larg: 12,

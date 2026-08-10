@@ -48,6 +48,8 @@
     titulo: 'Mudança de procedimento',
     descricao: 'Laudo para solicitação/autorização de mudança de procedimento e de procedimento(s) especial(ais) — Anexo II, folha 1/2.',
     modelo: 'assets/pdf/laudo-mudanca-procedimento.pdf',
+    folha: 'a4-retrato',
+    tituloPadrao: function (d) { return d.procedimento || 'Mudança de procedimento'; },
 
     campos: [
       { id: 'procedimento', rotulo: 'Descrição do procedimento principal',

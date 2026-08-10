@@ -49,6 +49,8 @@
     titulo: 'APAC',
     descricao: 'Laudo para solicitação/autorização de procedimento ambulatorial, fls. 1/2.',
     modelo: 'assets/pdf/apac.pdf',
+    folha: 'a4-retrato',
+    tituloPadrao: function (d) { return d.procedimento || 'APAC'; },
 
     campos: [
       { id: 'procedimento', rotulo: 'Nome do procedimento principal',

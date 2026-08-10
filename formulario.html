@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Documento · NeuroHelper</title>
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<div id="cabecalho"></div>
+
+<main class="container">
+  <p class="trilha"><a href="index.html">Início</a> ›
+     <a href="atendimento.html">Atendimento</a> › <span id="trilha-fim"></span></p>
+  <h2 id="titulo-pagina"></h2>
+  <p class="sub" id="sub-pagina"></p>
+
+  <form id="form-documento" novalidate>
+    <fieldset class="bloco">
+      <legend>Identificação do documento</legend>
+      <div class="grade">
+        <div class="campo c8">
+          <label for="titulo">Título <span class="opcional">(opcional)</span></label>
+          <input type="text" id="titulo" autocomplete="off" maxlength="60">
+          <span class="dica">Aparece na lista do atendimento. Em branco, o site preenche sozinho.</span>
+        </div>
+
+        <div class="campo c4">
+          <label class="opcao-caixa"><input type="checkbox" id="sem-data"> Emitir sem data</label>
+          <span class="dica">Deixa o campo de data em branco, para preencher à mão.</span>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset class="bloco">
+      <legend id="legenda-campos">Dados do documento</legend>
+      <div id="campos-documento"></div>
+    </fieldset>
+
+    <div class="acoes">
+      <button type="submit" class="btn-primario" id="btn-gravar">Gravar</button>
+      <button type="button" class="btn-secundario" id="btn-gerar">Gerar e imprimir</button>
+      <button type="button" class="btn-secundario" id="btn-baixar">Baixar</button>
+      <a class="btn-secundario botao-link" href="atendimento.html">Voltar</a>
+      <button type="button" class="btn-perigo" id="btn-excluir" hidden>Excluir</button>
+    </div>
+
+    <p class="aviso" id="aviso"></p>
+  </form>
+</main>
+
+<div id="rodape"></div>
+
+<script src="assets/js/pdf-comum.js"></script>
+<script src="assets/js/campos.js"></script>
+<script src="assets/js/armazenamento.js"></script>
+<script src="assets/js/cabecalho.js"></script>
+<script src="assets/js/doc-mudanca-procedimento.js"></script>
+<script src="assets/js/doc-apac.js"></script>
+<script src="assets/js/doc-requisicao-exames.js"></script>
+<script src="assets/js/doc-receituario-simples.js"></script>
+<script src="assets/js/doc-receituario-controle-especial.js"></script>
+<script src="assets/js/impressao.js"></script>
+<script src="assets/js/pag-formulario.js"></script>
+</body>
+</html>

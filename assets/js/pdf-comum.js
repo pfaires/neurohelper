@@ -88,7 +88,9 @@ window.Laudos = (function () {
     },
     uf: function (v) { return (v || '').replace(/[^a-zA-Z]/g, '').toUpperCase().slice(0, 2); },
     cid: function (v) { return (v || '').replace(/[^a-zA-Z0-9.]/g, '').toUpperCase().slice(0, 6); },
-    inteiro: function (v) { return digitos(v).slice(0, 3); }
+    inteiro: function (v) { return digitos(v).slice(0, 3); },
+    // só dígitos, sem limite próprio: quem limita é o maxlength do campo
+    numero: function (v) { return digitos(v); }
   };
 
   function paraData(v) {
@@ -348,66 +350,6 @@ window.Laudos = (function () {
       });
   }
 
-  /* Gera os documentos selecionados.
-     itens: [{ documento, dados }] — cada documento com os seus próprios valores.
-     modo: 'unico' (um PDF com todas as páginas) ou 'separado' (um PDF por documento). */
-  function gerar(itens, nomePaciente, modo) {
-    var cortou = false;
-    var seq = itens.map(function (item) {
-      return function () {
-        return preencher(item.documento, item.dados).then(function (r) {
-          cortou = cortou || r.cortou;
-          return { documento: item.documento, doc: r.doc };
-        });
-      };
-    });
-
-    return seq.reduce(function (p, f) {
-      return p.then(function (acc) {
-        return f().then(function (r) { acc.push(r); return acc; });
-      });
-    }, Promise.resolve([])).then(function (feitos) {
-
-      var apelido = semAcento(nomePaciente).toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40);
-
-      if (modo === 'unico' && feitos.length > 1) {
-        var PDFDocument = window.PDFLib.PDFDocument;
-        return PDFDocument.create().then(function (final) {
-          var passo = feitos.reduce(function (p, r) {
-            return p.then(function () {
-              return final.copyPages(r.doc, r.doc.getPageIndices()).then(function (pgs) {
-                pgs.forEach(function (pg) { final.addPage(pg); });
-              });
-            });
-          }, Promise.resolve());
-          return passo.then(function () {
-            final.setTitle('Documentos — ' + limpar(nomePaciente));
-            final.setProducer('HULW/UFPB — Residência em Neurologia');
-            return final.save();
-          }).then(function (bytes) {
-            return {
-              arquivos: [{ nome: 'documentos' + (apelido ? '-' + apelido : '') + '.pdf', bytes: bytes }],
-              cortou: cortou
-            };
-          });
-        });
-      }
-
-      return feitos.reduce(function (p, r) {
-        return p.then(function (acc) {
-          r.doc.setTitle(r.documento.titulo + ' — ' + limpar(nomePaciente));
-          r.doc.setProducer('HULW/UFPB — Residência em Neurologia');
-          return r.doc.save().then(function (bytes) {
-            acc.push({ nome: r.documento.id + (apelido ? '-' + apelido : '') + '.pdf', bytes: bytes });
-            return acc;
-          });
-        });
-      }, Promise.resolve([])).then(function (arquivos) {
-        return { arquivos: arquivos, cortou: cortou };
-      });
-    });
-  }
 
   return {
     documentos: [],
@@ -422,6 +364,8 @@ window.Laudos = (function () {
     dataValida: dataValida,
     hoje: hoje,
     idade: idade,
-    gerar: gerar
+    garantirPdfLib: garantirPdfLib,
+    bytesDe: bytesDe,
+    preencher: preencher
   };
 })();

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prescritores · NeuroHelper</title>
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<div id="cabecalho"></div>
+
+<main class="container">
+  <p class="trilha"><a href="index.html">Início</a> › Prescritores</p>
+  <h2>Prescritores deste computador</h2>
+  <p class="sub">A lista fica gravada nesta máquina e serve para computador compartilhado. Quem está ativo vale só para esta aba — ao abrir o site de novo, escolha quem é você.</p>
+
+  <div id="lista-prescritores"></div>
+
+  <form id="form-prescritor" novalidate>
+    <fieldset class="bloco">
+      <legend id="legenda-form">Novo prescritor</legend>
+      <div id="campos-prescritor"></div>
+    </fieldset>
+
+    <div class="acoes">
+      <button type="submit" class="btn-primario" id="btn-salvar">Salvar prescritor</button>
+      <button type="button" class="btn-secundario" id="btn-cancelar" hidden>Cancelar edição</button>
+    </div>
+
+    <p class="aviso" id="aviso"></p>
+  </form>
+</main>
+
+<div id="rodape"></div>
+
+<script src="assets/js/pdf-comum.js"></script>
+<script src="assets/js/campos.js"></script>
+<script src="assets/js/armazenamento.js"></script>
+<script src="assets/js/cabecalho.js"></script>
+<script src="assets/js/pag-prescritor.js"></script>
+</body>
+</html>

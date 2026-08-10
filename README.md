@@ -1,146 +1,225 @@
-# Residência Médica em Neurologia — HULW/UFPB
+# NeuroHelper — Residência em Neurologia, HULW/UFPB
 
-Site estático (HTML + CSS + JavaScript puro, sem build) para emissão de formulários
-em PDF da Residência Médica em Neurologia do Hospital Universitário Lauro Wanderley / UFPB.
+Site estático (HTML + CSS + JavaScript puro, sem build) para emissão de documentos
+da Residência Médica em Neurologia do Hospital Universitário Lauro Wanderley / UFPB.
 
-A identificação do paciente é preenchida uma única vez; cada documento é uma seção
-recolhível com caixa de seleção e seus campos próprios. Vários documentos podem ser
-emitidos de uma vez para o mesmo paciente, em um PDF único ou em arquivos separados.
+O fluxo gira em torno do **atendimento**: identifique o paciente uma vez, grave quantos
+documentos precisar, revise a lista e imprima tudo de uma vez. Todo o processamento
+acontece no navegador; nada é enviado para servidor algum.
 
-## Publicação no GitHub Pages
-
-1. Suba esta pasta para um repositório no GitHub.
-2. Em **Settings → Pages**, escolha *Deploy from a branch*, branch `main`, pasta `/ (root)`.
-3. O site fica disponível em `https://<usuario>.github.io/<repositorio>/`.
-
-Todos os caminhos são relativos, então funciona tanto na raiz do domínio quanto em subpasta.
-O arquivo `.nojekyll` evita que o Jekyll interfira nos assets.
-
-### Visibilidade
-
-O site é de uso interno e não deve aparecer em buscadores. Por isso há um `robots.txt`
-bloqueando o rastreamento e uma meta tag `robots` com `noindex` em cada página. As duas
-coisas juntas cobrem tanto o robô que respeita o `robots.txt` quanto o que só olha a meta tag.
-
-Isso mantém o site fora das buscas, mas **não é autenticação**: no GitHub Pages os arquivos
-são públicos para quem tiver o endereço. Como todo o processamento acontece no navegador e
-nenhum dado de paciente é gravado ou enviado, não há informação exposta — apenas os
-formulários em branco e o código. Se um dia for preciso login de verdade, o caminho é
-Cloudflare Pages com Cloudflare Access (gratuito até 50 usuários), sem mudar o código.
-
-## Estrutura
+## Fluxo
 
 ```
-index.html                          página inicial
-formularios.html                    página única de emissão
-assets/css/style.css                estilos
-assets/js/pdf-comum.js              máscaras, desenho no PDF, montagem dos arquivos
-assets/js/doc-*.js                  um arquivo por documento
-assets/js/emitir.js                 monta a página e orquestra a geração
-assets/js/vendor/                   (opcional) pdf-lib local
-assets/pdf/                         modelos em branco
-assets/img/                         logotipos HULW e HU Brasil
-ferramentas/gerar-modelos.py        redesenha os modelos próprios do HULW
-ferramentas/coordenadas.json        pontos de preenchimento gerados pelo script
-servir.bat / servir.sh              servidor local para desenvolvimento
+prescritor  →  iniciar atendimento  →  formulário  →  gravar
+                      ↑                                  ↓
+                      └────────  página do atendimento  ←─┘
+                                    ↓
+                              imprimir tudo
 ```
+
+Os kits são um atalho: pelo ambulatório, escolhe-se um conjunto de documentos que
+costumam sair juntos, preenche-se o que é comum a eles e tudo entra no atendimento
+já preenchido, pronto para revisão.
+
+## Onde cada dado vive
+
+| Dado | Onde | Até quando |
+|---|---|---|
+| Cadastro de prescritores | `localStorage` | permanente, é o cadastro da máquina |
+| Prescritor ativo | `sessionStorage` | só nesta aba |
+| Atendimento (paciente + documentos) | `sessionStorage` | some ao fechar a aba |
+
+Dado de paciente nunca vai para o `localStorage`. Em computador compartilhado, o que
+fica gravado em disco é apenas a lista de médicos — e o prescritor ativo é escolhido a
+cada sessão, para ninguém emitir documento com o nome de quem usou a máquina antes.
+
+Tudo passa por `assets/js/armazenamento.js`. No dia em que houver banco de dados,
+troca-se o corpo daquelas funções por chamadas de API e nada mais precisa mudar.
+
+## Páginas
+
+| Arquivo | Papel |
+|---|---|
+| `index.html` | Início: atendimento em andamento, ambulatórios, configuração |
+| `paciente.html` | Iniciar ou editar o paciente, com importação do AGHU |
+| `atendimento.html` | Paciente, tabela de documentos e impressão |
+| `formulario.html?doc=…&id=…` | Página genérica: renderiza qualquer documento |
+| `prescritor.html` | Cadastro local de prescritores |
+| `ambulatorio.html?id=…` | Seções recolhíveis com kits e referências |
+| `kit.html?id=…` | Escolher itens do kit e incluir no atendimento |
+| `kit-editor.html` | Criar e editar kits, exportar e importar o `kits.json` |
+
+## Módulos
+
+```
+assets/js/pdf-comum.js       desenho no PDF, máscaras, texto
+assets/js/armazenamento.js   prescritores, atendimento, documentos
+assets/js/campos.js          campos declarativos: HTML, máscara, leitura, validação
+assets/js/cabecalho.js       cabeçalho e barra de contexto de todas as páginas
+assets/js/impressao.js       montagem e agrupamento dos PDFs
+assets/js/aghu.js            leitura dos dados copiados do AGHU
+assets/js/doc-*.js           um arquivo por documento
+assets/dados/kits.json       kits publicados no repositório
+assets/js/kits.js            carregador dos kits (repositório + locais)
+assets/js/ambulatorios.js    conteúdo dos ambulatórios
+assets/js/pag-*.js           script de cada página
+```
+
+## Documentos
+
+| Documento | Folha | Origem do modelo |
+|---|---|---|
+| Mudança de procedimento (Anexo II) | A4 retrato | oficial do SUS |
+| APAC | A4 retrato | oficial do SUS |
+| Requisição de exames (LAC-001) | A5 paisagem | redesenhado |
+| Receituário simples | A5 retrato | redesenhado |
+| Receituário de controle especial | A4 paisagem, duas vias | redesenhado |
+
+Campos preenchidos em cada um:
+
+- **Mudança de procedimento** — 1 a 4 (fixos), 5 a 13, 15, 16, 26, 38, 39 a 42, e o "X" na barra de procedimentos especiais.
+- **APAC** — 1 e 2 (fixos), 3 a 11, 13, 14, 16, 17, 33 a 35, 37, 38 a 41.
+- **Requisição de exames** — nome, prontuário, idade (calculada), sexo, cartão social, enfermaria, leito, dados clínicos, urgência, justificativa, material e exames.
+- **Receituário simples** — nome, data, prontuário e prescrição.
+- **Receituário de controle especial** — paciente (com CPF entre parênteses, se informado), endereço, prescrição e data, iguais nas duas vias.
+
+O bloco de identificação do médico (nome, título, CRM, RQE) fica guardado no cadastro
+mas ainda **não é impresso**: as áreas de assinatura saem em branco para carimbo físico.
+Ligar isso depois é uma tarefa isolada.
+
+## Impressão agrupada
+
+Documentos de meia página dividem uma folha A4 retrato, cortada ao meio na horizontal,
+com linha tracejada marcando onde cortar. São duas vagas de 595 × 421 pt:
+
+- **A5 paisagem** (requisição de exames) entra direto na vaga;
+- **A5 retrato** (receituário simples) entra girado 90° para a esquerda e ocupa
+  exatamente a mesma vaga.
+
+Como a vaga é a mesma para os dois, tipos diferentes dividem a folha — uma requisição
+em cima e um receituário embaixo, por exemplo — e o corte é sempre no mesmo lugar.
+O agrupamento respeita a ordem da tabela: cada documento entra na próxima vaga livre.
+A página mostra quantas folhas vão sair e quanto se economiza; a caixa pode ser
+desmarcada para uma folha por documento.
+
+### Emitir sem data
+
+Cada documento tem a opção **emitir sem data**, que deixa o campo de data em branco no
+PDF para preenchimento à mão. A escolha fica gravada junto com o documento e aparece
+marcada na lista do atendimento.
+
+### Exames em colunas
+
+Na requisição de exames, a lista é distribuída em até quatro colunas de cerca de sete
+linhas, preenchidas da esquerda para a direita. Com 15 exames, por exemplo, saem três
+colunas de cinco. O corpo da letra se ajusta ao número de linhas por coluna.
+
+## Importação do AGHU
+
+Na aba **POL → Dados Pessoais** do AGHU, selecione tudo (`Ctrl+A`), copie (`Ctrl+C`) e
+clique em **Importar do AGHU** na identificação do paciente.
+
+O leitor interpreta pares rótulo/valor e tolera variações: linhas em branco a mais ou a
+menos, campos vazios, acentuação perdida, caixa alta ou baixa, `Rótulo: valor` e
+`Rótulo<TAB>valor` na mesma linha, e cabeçalho ou rodapé em volta. A ordem não importa.
+Preenche nome, prontuário, CNS, CPF, nascimento, sexo, nome da mãe, telefone, endereço,
+município, UF e CEP, sem tocar no que não veio na cópia. Rótulos novos entram nos mapas
+`ALVOS` e `IGNORAR` em `aghu.js`.
 
 ## Modelos em branco
 
-Os dois formulários do SUS (mudança de procedimento e APAC) usam os PDFs oficiais.
-
-Os três formulários próprios do HULW só existiam digitalizados, então foram redesenhados
-em vetor por `ferramentas/gerar-modelos.py`, com os logotipos atuais — HU Brasil no lugar
-de EBSERH. Para alterar o desenho, edite o script e rode a partir da raiz do site:
+Os dois formulários do SUS usam os PDFs oficiais. Os três do HULW só existiam
+digitalizados e foram redesenhados em vetor por `ferramentas/gerar-modelos.py`, com os
+logotipos atuais — HU Brasil no lugar de EBSERH. Para mudar o desenho:
 
 ```
 python3 ferramentas/gerar-modelos.py
 ```
 
-Ele regrava os PDFs em `assets/pdf/` e o `ferramentas/coordenadas.json`, que é a fonte das
-constantes usadas nos módulos `doc-requisicao-exames.js`, `doc-receituario-simples.js` e
-`doc-receituario-controle-especial.js`. Se mudar o layout, atualize as constantes desses
-módulos a partir do JSON. Requer `reportlab`.
+O script regrava os PDFs em `assets/pdf/` e o `ferramentas/coordenadas.json`, que é a
+fonte das constantes dos módulos correspondentes. Requer `reportlab`.
 
-## Como o PDF é gerado
+> Os dados institucionais (CNPJ, endereço, telefone) foram padronizados a partir dos dois
+> receituários originais, que traziam informações divergentes. **Confira antes de usar em
+> produção**, sobretudo no controle especial, sujeito à Portaria SVS/MS 344/98.
 
-O modelo oficial em branco é carregado com `fetch` e os dados são escritos por cima com a
-biblioteca [pdf-lib](https://pdf-lib.js.org/), em Helvetica Bold, para destacar do texto
-impresso do formulário. Nada é enviado para servidor algum — todo o processamento acontece
-no navegador.
+## Acrescentar um documento
 
-O resultado abre em nova aba; se o navegador bloquear o pop-up, aparecem links de download
-na própria página.
+Cada documento é um `assets/js/doc-<id>.js` que se registra sozinho. Não é preciso mexer
+em nenhuma página.
 
-### Documentos e campos preenchidos
+1. Coloque o modelo em branco em `assets/pdf/`.
+2. Crie `assets/js/doc-<id>.js` no molde dos existentes, declarando:
+   - `folha`: `a4-retrato`, `a4-paisagem`, `a5-retrato` ou `a5-paisagem`;
+   - `campos`: os campos próprios, que a página de formulário renderiza sozinha;
+   - `tituloPadrao(dados)`: título automático da linha na tabela;
+   - `preencher(pincel, dados, api)`: desenha sobre o modelo.
+3. Acrescente a tag `<script>` em `atendimento.html`, `formulario.html`, `kit.html` e
+   `kit-editor.html`.
 
-**Mudança de procedimento** (Anexo II, folha 1/2)
+Para descobrir coordenadas de um modelo oficial do SUS, lembre que o eixo Y da estrutura
+vetorial vem espelhado: a coordenada real é `842 − y` do que as bibliotecas reportam.
 
-| Bloco | Campos |
-|---|---|
-| Estabelecimento | 1 a 4 — fixos: HOSPITAL UNIVERSITÁRIO LAURO WANDERLEY, CNES 2400243 |
-| Paciente | 5 a 13, 15 e 16 |
-| Procedimento solicitado | 26 e 38, mais o "X" na barra de procedimentos especiais |
-| Profissional solicitante | 39 a 42 |
+## Kits
 
-**APAC** (fls. 1/2)
+Um kit é um conjunto de documentos que costuma sair junto. Ele lista os documentos com
+valores de partida e pode ter um campo comum — `aplicaEm` diz em quais campos de cada
+documento aquele dado entra, de modo que o mesmo resumo clínico vira justificativa numa
+mudança de procedimento e dados clínicos numa requisição de exames.
 
-| Bloco | Campos |
-|---|---|
-| Estabelecimento solicitante | 1 e 2 — fixos |
-| Paciente | 3 a 11, 13 e 14 |
-| Procedimento solicitado | 16 e 17 |
-| Justificativa | 33, 34, 35 e 37 (o campo 36, causas associadas, fica em branco) |
-| Solicitação | 38 a 41 |
+Os kits vêm de duas origens, mescladas por id com o local sobrepondo:
 
-**Requisição de exames** (LAC-001) — A5 paisagem, 595 × 420 pt
+| Origem | Onde | Alcance |
+|---|---|---|
+| Publicados | `assets/dados/kits.json` | todo mundo, após o deploy |
+| Locais | `localStorage` | só aquele computador, na hora |
 
-Nome, prontuário, idade (calculada da data de nascimento), sexo, cartão social, enfermaria,
-leito, dados clínicos, urgência, justificativa, material a examinar, exames e data.
+### Editor
 
-**Receituário simples** — A5 retrato, 420 × 595 pt
+`kit-editor.html` cria e edita kits pela interface: título, ambulatório, campo comum e a
+lista de documentos, cada um com os seus campos preenchidos pela mesma renderização
+declarativa dos formulários. Dá para reordenar, duplicar e remover itens.
 
-Nome, data, prontuário e prescrição.
+**Salvar** grava no `localStorage` e o kit já aparece no ambulatório daquele computador —
+sem deploy. Isso serve para iterar no texto até ficar bom.
 
-**Receituário de controle especial** — A4 paisagem, 842 × 595 pt
+**Publicar** é exportar: o botão gera um `kits.json` com todos os kits (publicados mais
+locais), que você substitui em `assets/dados/kits.json` no repositório e sobe. A partir
+daí o kit passa a valer para todo mundo.
 
-Duas vias idênticas lado a lado, com linha de corte no meio: paciente, endereço,
-prescrição e data em cada uma. Se o CPF do paciente for informado, ele sai entre
-parênteses depois do nome — é o único documento que usa esse campo. Os quadros de
-identificação do comprador e do fornecedor ficam em branco, para preenchimento na farmácia.
+**Importar** lê um `kits.json` de volta para o computador — útil para levar kits de uma
+máquina a outra antes de publicar.
 
-Os demais campos ficam em branco para preenchimento manual.
+Um kit publicado que você editar localmente fica marcado como "alterado aqui", e o botão
+**restaurar original** descarta a versão local e volta à publicada.
 
-### Importação do AGHU
+O carregamento é assíncrono: quem usa `Kits.todos()` ou `Kits.porId()` precisa chamar
+`Kits.carregar()` antes.
 
-O botão **Importar do AGHU**, na identificação do paciente, lê os dados copiados da aba
-**POL → Dados Pessoais**. Basta selecionar tudo na tela do AGHU (`Ctrl+A`), copiar (`Ctrl+C`)
-e clicar no botão.
+## Ambulatórios
 
-O leitor (`assets/js/aghu.js`) interpreta o formato do AGHU — pares rótulo/valor em linhas
-alternadas — e é tolerante a variações: linhas em branco a mais ou a menos, campos vazios,
-acentuação perdida, caixa alta ou baixa, `Rótulo: valor` e `Rótulo<TAB>valor` na mesma
-linha, e lixo em volta (cabeçalho e rodapé da página). A ordem dos campos não importa.
+Editados em `assets/js/ambulatorios.js`. Cada ambulatório é uma lista de seções
+recolhíveis; cada item de seção é um kit, um link ou uma nota. O conteúdo atual é um
+esqueleto a ser preenchido.
 
-Preenche nome, prontuário, CNS, CPF, nascimento, sexo, nome da mãe, telefone, endereço
-(logradouro, número, complemento e bairro reunidos), município, UF e CEP. Só altera os
-campos encontrados no texto colado; o resto permanece como estava.
+## Publicação no GitHub Pages
 
-Quando o navegador permite ler a área de transferência, a importação é direta. Quando não
-permite — Firefox, ou permissão negada no Chrome —, abre uma caixa para colar o texto com
-`Ctrl+V`. Para acrescentar rótulos novos, edite os mapas `ALVOS` e `IGNORAR` em `aghu.js`.
+Settings → Pages → *Deploy from a branch*, `main`, `/ (root)`. Os caminhos são relativos,
+então funciona em subpasta. O `.nojekyll` impede o Jekyll de interferir.
 
-### Dados guardados no navegador
+### Visibilidade
 
-Apenas nome, tipo e número do documento do **profissional solicitante** ficam salvos
-(`localStorage`, chave `hulw.neuro.profissional`), para não redigitar a cada uso.
-Nenhum dado de paciente é gravado.
+`robots.txt` bloqueia rastreamento e cada página traz `noindex`. Isso mantém o site fora
+das buscas, mas **não é autenticação** — no GitHub Pages os arquivos são públicos para
+quem tiver o endereço. Como nada de paciente é gravado em disco nem enviado, o que fica
+exposto são os formulários em branco e o código. Para login de verdade, o caminho é
+Cloudflare Pages com Cloudflare Access, sem mudar o código.
 
 ### pdf-lib offline (opcional)
 
-Por padrão a biblioteca vem do CDN jsDelivr. Para deixar o site independente de rede
-externa, baixe `pdf-lib.min.js` e salve em `assets/js/vendor/pdf-lib.min.js` — o site
-tenta o arquivo local primeiro e só recorre ao CDN se ele não existir.
+Por padrão a biblioteca vem do CDN jsDelivr. Para deixar o site independente de rede,
+baixe `pdf-lib.min.js` para `assets/js/vendor/pdf-lib.min.js` — o site tenta o arquivo
+local primeiro.
 
 ```
 curl -o assets/js/vendor/pdf-lib.min.js https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js
@@ -148,41 +227,9 @@ curl -o assets/js/vendor/pdf-lib.min.js https://cdn.jsdelivr.net/npm/pdf-lib@1.1
 
 ## Desenvolvimento local
 
-As páginas usam `fetch` para ler os modelos PDF, o que não funciona abrindo o HTML
-direto com `file://`. É preciso um servidor local.
+As páginas usam `fetch` para ler os modelos PDF, o que não funciona com `file://`.
 
-**Windows:** dê dois cliques em `servir.bat`. Ele sobe o servidor e já abre o
-navegador em `http://localhost:8000/`. Para usar outra porta: `servir.bat 8080`.
+**Windows:** dois cliques em `servir.bat` (ou `servir.bat 8080` para outra porta).
+**macOS / Linux:** `./servir.sh`.
 
-**macOS / Linux:** `./servir.sh` (ou `./servir.sh 8080`).
-
-Nos dois casos, deixe a janela do terminal aberta enquanto estiver usando o site e
-pressione `Ctrl+C` para parar.
-
-Se preferir sem script: `python -m http.server 8000` dentro desta pasta.
-
-## Adicionando um novo documento
-
-Cada documento é um arquivo `assets/js/doc-<id>.js` que se registra sozinho. Não é preciso
-mexer no HTML nem no `emitir.js`.
-
-1. Coloque o modelo em branco em `assets/pdf/`.
-2. Crie `assets/js/doc-<id>.js` no molde dos existentes, com:
-   - `CX` (caixas de texto), `CEL` (grades de caractere), `DATA` (datas) e `MARCA`
-     (marcações "X") — tudo em pontos PDF, origem no canto inferior esquerdo;
-   - `campos`: os campos específicos do documento, que a página renderiza sozinha
-     (`tipo` `texto` ou `area`, `larg` de 1 a 12 colunas, `mascara`, `obrigatorio`, `valor`);
-   - `preencher(pincel, dados, api)`: recebe os dados já combinados (paciente +
-     profissional + campos próprios) e desenha na página.
-3. Acrescente a tag `<script>` do arquivo em `formularios.html`, antes de `emitir.js`.
-
-Para descobrir as coordenadas de um modelo novo, vale lembrar que os PDFs oficiais do SUS
-usados aqui têm o eixo Y espelhado na estrutura vetorial: a coordenada real é
-`842 − y` do que as bibliotecas de extração reportam.
-
-## Próximo passo previsto
-
-Kits de documentos: agrupar documentos que costumam sair juntos (por exemplo, uma mudança
-de procedimento para cada exame de imagem na investigação de doença desmielinizante),
-com a possibilidade de marcar dentro do kit quais serão emitidos. A seleção por caixas
-já existente é a base dessa funcionalidade.
+Sem script: `python -m http.server 8000` dentro desta pasta.

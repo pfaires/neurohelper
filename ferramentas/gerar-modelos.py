@@ -256,12 +256,15 @@ def via_controle_especial(f, x0, campos, sufixo):
     f.celula(k('endereco'), 'Endereço:', E, 412, D, 432, moldura=False)
     f.linha(E, 412, D, 412, 0.6)
 
-    campos[k('prescricao')] = [E + 2, 196.0, D - 2, 402.0]
+    # a prescrição foi encurtada para sobrar espaço de assinatura e carimbo:
+    # a faixa entre a linha de assinatura (180) e o fim da prescrição (258)
+    # fica livre para o carimbo do médico.
+    campos[k('prescricao')] = [E + 2, 258.0, D - 2, 402.0]
 
-    f.celula(k('data'), 'Data:', E, 168, 190 + x0, 188, moldura=False)
-    f.linha(E, 168, 190 + x0, 168, 0.6)
-    f.linha(240 + x0, 172, D, 172, 0.6)
-    f.txtc('Assinatura do médico', (240 + x0 + D) / 2, 162, 7.5)
+    f.celula(k('data'), 'Data:', E, 176, 190 + x0, 196, moldura=False)
+    f.linha(E, 176, 190 + x0, 176, 0.6)
+    f.linha(240 + x0, 180, D, 180, 0.6)
+    f.txtc('Assinatura e carimbo do médico', (240 + x0 + D) / 2, 168, 7.5)
 
     # identificação do comprador
     f.ret(E, 52, 212 + x0, 148)

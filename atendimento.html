@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Atendimento · NeuroHelper</title>
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<div id="cabecalho"></div>
+
+<main class="container">
+  <p class="trilha"><a href="index.html">Início</a> › Atendimento</p>
+
+  <div class="cartao-paciente" id="cartao-paciente"></div>
+
+  <h3 class="titulo-secao">Documentos deste atendimento</h3>
+  <div id="tabela-documentos"></div>
+
+  <details class="doc" id="novo-documento">
+    <summary><span class="doc-titulo">Adicionar documento</span>
+      <span class="doc-descricao">Escolha o tipo de documento para preencher agora.</span></summary>
+    <ul class="cartoes" id="lista-tipos"></ul>
+  </details>
+
+  <div class="bloco" id="bloco-impressao">
+    <h3>Imprimir</h3>
+    <div class="campo">
+      <label class="opcao-caixa">
+        <input type="checkbox" id="agrupar" checked>
+        Agrupar documentos de meia página numa folha A4
+      </label>
+      <span class="dica" id="dica-folhas"></span>
+    </div>
+    <div class="acoes">
+      <button type="button" class="btn-primario" id="btn-imprimir">Imprimir tudo</button>
+      <button type="button" class="btn-secundario" id="btn-baixar">Baixar tudo</button>
+    </div>
+    <p class="aviso" id="aviso"></p>
+  </div>
+</main>
+
+<div id="rodape"></div>
+
+<script src="assets/js/pdf-comum.js"></script>
+<script src="assets/js/campos.js"></script>
+<script src="assets/js/armazenamento.js"></script>
+<script src="assets/js/cabecalho.js"></script>
+<script src="assets/js/doc-mudanca-procedimento.js"></script>
+<script src="assets/js/doc-apac.js"></script>
+<script src="assets/js/doc-requisicao-exames.js"></script>
+<script src="assets/js/doc-receituario-simples.js"></script>
+<script src="assets/js/doc-receituario-controle-especial.js"></script>
+<script src="assets/js/impressao.js"></script>
+<script src="assets/js/pag-atendimento.js"></script>
+</body>
+</html>

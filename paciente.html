@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Paciente · NeuroHelper</title>
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<div id="cabecalho"></div>
+
+<main class="container">
+  <p class="trilha"><a href="index.html">Início</a> › <span id="trilha-fim">Iniciar atendimento</span></p>
+  <h2 id="titulo-pagina">Iniciar atendimento</h2>
+  <p class="sub" id="sub-pagina">Os dados ficam ativos até você encerrar o atendimento ou fechar esta aba. Nada é gravado em disco.</p>
+
+  <form id="form-paciente" novalidate>
+    <fieldset class="bloco" id="bloco-paciente">
+      <legend>Identificação do paciente</legend>
+
+      <div class="barra-bloco">
+        <button type="button" class="btn-mini" id="btn-importar"
+                title="Na aba POL do AGHU, copie os dados do paciente (Ctrl+A, Ctrl+C) e clique aqui">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="9" y="9" width="13" height="13" rx="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+          Importar do AGHU
+        </button>
+        <span class="retorno" id="retorno-aghu" role="status"></span>
+      </div>
+
+      <div id="campos-paciente"></div>
+    </fieldset>
+
+    <div class="acoes">
+      <button type="submit" class="btn-primario" id="btn-salvar">Iniciar atendimento</button>
+      <a class="btn-secundario botao-link" href="index.html" id="btn-cancelar">Cancelar</a>
+    </div>
+
+    <p class="aviso" id="aviso"></p>
+  </form>
+
+  <dialog id="dlg-aghu" class="dialogo">
+    <h3>Importar dados do AGHU</h3>
+    <p>Na aba <strong>POL</strong> do AGHU, com os dados do paciente na tela, selecione tudo
+       (<kbd>Ctrl</kbd>+<kbd>A</kbd>) e copie (<kbd>Ctrl</kbd>+<kbd>C</kbd>).
+       Depois cole aqui com <kbd>Ctrl</kbd>+<kbd>V</kbd>.</p>
+    <textarea id="txt-aghu" rows="8" placeholder="Cole aqui os dados copiados do AGHU"></textarea>
+    <p class="aviso" id="aviso-aghu"></p>
+    <div class="acoes">
+      <button type="button" class="btn-primario" id="btn-aghu-importar">Importar</button>
+      <button type="button" class="btn-secundario" id="btn-aghu-fechar">Cancelar</button>
+    </div>
+  </dialog>
+</main>
+
+<div id="rodape"></div>
+
+<script src="assets/js/pdf-comum.js"></script>
+<script src="assets/js/campos.js"></script>
+<script src="assets/js/armazenamento.js"></script>
+<script src="assets/js/cabecalho.js"></script>
+<script src="assets/js/aghu.js"></script>
+<script src="assets/js/pag-paciente.js"></script>
+</body>
+</html>
