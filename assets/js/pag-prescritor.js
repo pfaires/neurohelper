@@ -15,7 +15,7 @@
 
   var raiz = document.getElementById('campos-prescritor');
   raiz.innerHTML = C.html('presc', C.PRESCRITOR);
-  C.ligar(document, 'presc');
+  C.ligar(document, 'presc', C.PRESCRITOR);
   C.aplicar(document, 'presc', C.PRESCRITOR, {});
 
   // -------------------------------------------------------------- registro

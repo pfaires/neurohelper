@@ -39,7 +39,7 @@
 
   var raiz = document.getElementById('campos-documento');
   raiz.innerHTML = C.html('doc', modulo.campos);
-  C.ligar(document, 'doc');
+  C.ligar(document, 'doc', modulo.campos);
   C.aplicar(document, 'doc', modulo.campos, salvo ? salvo.dados : {});
 
   if (salvo) {

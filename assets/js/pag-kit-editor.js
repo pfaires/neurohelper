@@ -147,7 +147,7 @@
       $('#t-' + it.uid).value = it.titulo || '';
       $('#m-' + it.uid).checked = it.marcado !== false;
       if (m) {
-        C.ligar(document, it.uid);
+        C.ligar(document, it.uid, m.campos);
         C.aplicar(document, it.uid, m.campos, it.valores || {});
       }
     });

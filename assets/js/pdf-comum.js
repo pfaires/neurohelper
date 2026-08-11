@@ -128,10 +128,14 @@ window.Laudos = (function () {
 
   function criarPincel(pg, fontes) {
     var fn = fontes.normal, fb = fontes.negrito;
+    var fi = fontes.italico || fn, fbi = fontes.negritoItalico || fb;
     var rgb = window.PDFLib.rgb;
     var PRETO = rgb(0, 0, 0);
 
     function f(negrito) { return negrito ? fb : fn; }
+    function fonteDe(neg, ita) {
+      return neg ? (ita ? fbi : fb) : (ita ? fi : fn);
+    }
     function larg(t, tam, negrito) { return f(negrito).widthOfTextAtSize(t, tam); }
 
     // ---- primitivas de página inteira
@@ -159,55 +163,132 @@ window.Laudos = (function () {
       pg.drawText(texto, { x: cx - larg(texto, t, negrito) / 2, y: y, size: t, font: f(negrito), color: PRETO });
     }
 
-    function quebrar(texto, tam, largura, negrito) {
-      var linhas = [];
-      limparBloco(texto).split('\n').forEach(function (par) {
-        if (!par) { linhas.push(''); return; }
-        var atual = '';
-        par.split(' ').forEach(function (p) {
-          var tent = atual ? atual + ' ' + p : p;
-          if (larg(tent, tam, negrito) <= largura) {
-            atual = tent;
-          } else {
-            if (atual) linhas.push(atual);
-            atual = p;
-          }
+    // ------------------------------------------------------- markdown
+
+    /* Um bloco de texto longo é interpretado como markdown (ver markdown.js).
+       Texto sem marcação nenhuma sai exatamente como texto corrido. */
+
+    function fatias(partes, forcarNegrito) {
+      var toks = [];
+      (partes || []).forEach(function (p) {
+        String(p.t).split(/(\s+)/).forEach(function (s) {
+          if (!s) return;
+          toks.push({ t: s, n: p.n || forcarNegrito, i: p.i, esp: /^\s+$/.test(s) });
         });
-        if (atual) linhas.push(atual);
+      });
+      return toks;
+    }
+
+    function largTok(tk, tam) {
+      return fonteDe(tk.n, tk.i).widthOfTextAtSize(tk.t, tam);
+    }
+
+    function quebrarTokens(toks, tam, largura) {
+      var linhas = [], atual = [], w = 0;
+      toks.forEach(function (tk) {
+        var lw = largTok(tk, tam);
+        if (tk.esp) {
+          if (atual.length) { atual.push(tk); w += lw; }
+          return;
+        }
+        if (w + lw > largura && atual.length) {
+          while (atual.length && atual[atual.length - 1].esp) w -= largTok(atual.pop(), tam);
+          linhas.push(atual);
+          atual = [tk]; w = lw;
+        } else {
+          atual.push(tk); w += lw;
+        }
+      });
+      if (atual.length) linhas.push(atual);
+      return linhas;
+    }
+
+    /* Converte os blocos do markdown em linhas desenháveis, já quebradas. */
+    function montarLinhas(bs, tam, largura, negBase) {
+      var linhas = [];
+      bs.forEach(function (b) {
+        if (b.tipo === 'vazia') { linhas.push({ avanco: tam * 0.66 }); return; }
+        if (b.tipo === 'regua') { linhas.push({ regua: true, avanco: tam * 0.95 }); return; }
+
+        var t = tam * (b.escala || 1);
+        var recuo = b.recuo || 0;
+        var toks = fatias(b.partes, negBase || b.forcarNegrito);
+        var qs = quebrarTokens(toks, t, largura - recuo);
+        if (!qs.length) qs = [[]];
+        qs.forEach(function (ln, k) {
+          linhas.push({
+            toks: ln, tam: t, recuo: recuo, avanco: t * 1.32,
+            prefixo: k === 0 ? (b.marcador || null) : null,
+            prefixoNegrito: !!negBase
+          });
+        });
       });
       return linhas;
     }
 
-    /* Escreve um bloco de texto respeitando as quebras digitadas.
-       Devolve true se não coube inteiro. */
-    function paragrafo(texto, x, yTopo, largura, piso, tam, entre, negrito) {
-      if (!limparBloco(texto)) return false;
-      var t = tam || TAM;
-      var e = entre || t * 1.32;
-      var linhas = quebrar(texto, t, largura, negrito);
-      var cabem = Math.max(1, Math.floor((yTopo - piso) / e) + 1);
-      linhas.slice(0, cabem).forEach(function (l, i) {
-        if (l) pg.drawText(l, { x: x, y: yTopo - i * e, size: t, font: f(negrito), color: PRETO });
+    function alturaLinhas(linhas) {
+      if (!linhas.length) return 0;
+      var soma = linhas[0].tam ? linhas[0].tam : 0;
+      for (var k = 0; k < linhas.length - 1; k++) soma += linhas[k].avanco;
+      return soma;
+    }
+
+    function desenharLinhas(linhas, x, yTopo, largura) {
+      var y = yTopo;
+      linhas.forEach(function (ln, k) {
+        y -= k === 0 ? (ln.tam || 0) * 0.85 : linhas[k - 1].avanco;
+
+        if (ln.regua) {
+          pg.drawLine({
+            start: { x: x, y: y + 2 }, end: { x: x + largura, y: y + 2 },
+            thickness: 0.6, color: rgb(0.55, 0.55, 0.55)
+          });
+          return;
+        }
+        if (!ln.toks) return;
+
+        var cx = x + ln.recuo;
+        if (ln.prefixo) {
+          pg.drawText(ln.prefixo, {
+            x: x, y: y, size: ln.tam,
+            font: fonteDe(ln.prefixoNegrito, false), color: PRETO
+          });
+        }
+        ln.toks.forEach(function (tk) {
+          if (!tk.esp) {
+            pg.drawText(tk.t, {
+              x: cx, y: y, size: ln.tam, font: fonteDe(tk.n, tk.i), color: PRETO
+            });
+          }
+          cx += largTok(tk, ln.tam);
+        });
       });
-      return linhas.length > cabem;
     }
 
     /* Bloco de texto dentro de uma área [x0, y0, x1, y1], reduzindo o corpo
        até caber. Devolve true se ainda assim sobrou texto. */
     function bloco(texto, area, opcoes) {
       opcoes = opcoes || {};
-      if (!limparBloco(texto)) return false;
-      var negrito = opcoes.negrito !== false;
+      var limpo = limparBloco(texto);
+      if (!limpo) return false;
+
+      var negBase = opcoes.negrito !== false;
       var largura = area[2] - area[0];
-      var topo = area[3], piso = area[1];
-      var t = opcoes.tam || TAM, entre, linhas;
+      var alturaMax = area[3] - area[1];
+      var bs = window.Markdown.blocos(limpo);
+
+      var t = opcoes.tam || TAM, linhas;
       while (true) {
-        entre = t * 1.32;
-        linhas = quebrar(texto, t, largura, negrito);
-        if ((linhas.length - 1) * entre + t <= topo - piso || t <= 7) break;
+        linhas = montarLinhas(bs, t, largura, negBase);
+        if (alturaLinhas(linhas) <= alturaMax || t <= (opcoes.minimo || 7)) break;
         t -= 0.5;
       }
-      return paragrafo(texto, area[0], topo - t * 0.85, largura, piso, t, entre, negrito);
+
+      // ainda sobrando: corta as linhas que não cabem
+      var cabem = linhas.length;
+      while (cabem > 1 && alturaLinhas(linhas.slice(0, cabem)) > alturaMax) cabem--;
+      desenharLinhas(linhas.slice(0, cabem), area[0], area[3], largura);
+      return cabem < linhas.length;
     }
 
     // ---- helpers dos formulários (escrita por cima do modelo)
@@ -265,24 +346,16 @@ window.Laudos = (function () {
       txtC('X', ponto[0], ponto[1], tam || TAM_MARCA, true);
     }
 
-    function multilinha(texto, caixa) {
-      if (!limparBloco(texto)) return false;
-      var largura = caixa[2] - caixa[0] - 16;
-      var topo = caixa[3] - 14;
-      var piso = caixa[1] + 7;
-      var t = 10.5, entre, linhas;
-      while (true) {
-        entre = t * 1.28;
-        linhas = quebrar(texto, t, largura, true);
-        if (linhas.length * entre <= topo - piso || t <= 7) break;
-        t -= 0.5;
-      }
-      return paragrafo(texto, caixa[0] + 8, topo, largura, piso, t, entre, true);
+    /* Caixa dos formulários do SUS: o rótulo ocupa a borda de cima. */
+    function multilinha(texto, caixa, opcoes) {
+      opcoes = opcoes || {};
+      return bloco(texto, [caixa[0] + 8, caixa[1] + 7, caixa[2] - 8, caixa[3] - 14],
+                   { negrito: opcoes.negrito !== false, tam: opcoes.tam || 10.5 });
     }
 
     return {
       txt: txt, txtLim: txtLim, txtC: txtC,
-      paragrafo: paragrafo, bloco: bloco, emPonto: emPonto, larguraDe: larg,
+      bloco: bloco, emPonto: emPonto, larguraDe: larg,
       emCaixa: emCaixa, emCaixaCentro: emCaixaCentro, emCelulas: emCelulas,
       emData: emData, marcar: marcar, multilinha: multilinha
     };
@@ -335,10 +408,15 @@ window.Laudos = (function () {
         var StandardFonts = window.PDFLib.StandardFonts;
         return Promise.all([
           doc.embedFont(StandardFonts.Helvetica),
-          doc.embedFont(StandardFonts.HelveticaBold)
+          doc.embedFont(StandardFonts.HelveticaBold),
+          doc.embedFont(StandardFonts.HelveticaOblique),
+          doc.embedFont(StandardFonts.HelveticaBoldOblique)
         ]).then(function (fontes) {
           var paginas = doc.getPages();
-          var pincel = criarPincel(paginas[0], { normal: fontes[0], negrito: fontes[1] });
+          var pincel = criarPincel(paginas[0], {
+            normal: fontes[0], negrito: fontes[1],
+            italico: fontes[2], negritoItalico: fontes[3]
+          });
           var cortou = documento.preencher(pincel, dados, {
             estabelecimento: ESTABELECIMENTO,
             cnes: CNES,

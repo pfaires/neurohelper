@@ -509,3 +509,45 @@ code {
   border-radius: 4px;
   padding: 1px 5px;
 }
+
+/* tabela de linhas repetidas (medicamentos do LME) */
+.linhas { display: flex; flex-direction: column; gap: 6px; }
+.linha-item { display: flex; align-items: center; gap: 6px; }
+.linha-cabecalho {
+  font-size: .68rem;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+  color: var(--cinza);
+  font-weight: 700;
+  padding-bottom: 2px;
+}
+.linha-cabecalho .linha-col { padding-left: 2px; }
+.linha-num {
+  flex: 0 0 16px;
+  font-size: .78rem;
+  color: var(--cinza);
+  text-align: right;
+}
+.linha-col { display: block; min-width: 0; }
+.linha-col input { width: 100%; }
+.linha-acao { flex: 0 0 26px; }
+.btn-linha {
+  width: 26px; height: 30px;
+  padding: 0;
+  font-size: 1.1rem;
+  line-height: 1;
+  color: var(--cinza);
+  background: transparent;
+  border: 1px solid var(--borda);
+  border-radius: 6px;
+}
+.btn-linha:hover { color: var(--erro); border-color: var(--erro); background: #fdecea; }
+.linhas .btn-acrescentar { align-self: flex-start; margin-top: 4px; }
+.campo.erro .linha-col input { border-color: var(--erro); }
+
+@media (max-width: 720px) {
+  .linha-item { flex-wrap: wrap; }
+  .linha-cabecalho { display: none; }
+  .linha-col { flex: 1 1 60px !important; }
+  .linha-col:first-of-type { flex: 1 1 100% !important; }
+}

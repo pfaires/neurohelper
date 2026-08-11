@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Gera os modelos em branco dos formulários próprios do HULW/UFPB.
+Gera os modelos em branco usados pelo site.
 
 Os formulários originais existiam apenas digitalizados; aqui eles são redesenhados
 em vetor, com os logotipos atuais (HU Brasil no lugar de EBSERH).
@@ -10,6 +10,7 @@ Saída:
   assets/pdf/requisicao-exames.pdf              A5 paisagem  (595 x 420)
   assets/pdf/receituario-simples.pdf            A5 retrato   (420 x 595)
   assets/pdf/receituario-controle-especial.pdf  A4 paisagem  (842 x 595), duas vias
+  assets/pdf/outros-documentos.pdf              A5 retrato   (420 x 595)
 
   ferramentas/coordenadas.json   pontos de preenchimento, para os módulos JS
 
@@ -44,6 +45,7 @@ class Folha:
     def __init__(self, c, campos):
         self.c = c
         self.campos = campos
+        self.rotulos = []      # rótulos de borda, desenhados por último
 
     # -- texto
 
@@ -119,6 +121,61 @@ class Folha:
 
     def rodape(self, texto, cx, y):
         self.txtc(texto, cx, y, 6.5)
+
+    # -- caixas arredondadas com rótulo na borda (estilo dos formulários do SUS)
+
+    def arred(self, x0, y0, x1, y1, r=6, esp=0.8):
+        self.c.setLineWidth(esp)
+        self.c.roundRect(x0, y0, x1 - x0, y1 - y0, r)
+
+    def rotulo_borda(self, texto, x, y, tam=7, negrito=False, folga=2.5):
+        """Enfileira um rótulo que senta na borda de uma caixa.
+
+        O desenho é adiado para o fim da página: se o vão branco fosse aberto
+        agora, qualquer traço desenhado depois passaria por cima do texto — foi
+        o que acontecia com as grades de células."""
+        self.rotulos.append((texto, x, y, tam, negrito, folga))
+
+    def desenhar_rotulos(self):
+        for texto, x, y, tam, negrito, folga in self.rotulos:
+            w = self.larg(texto, tam, negrito)
+            self.c.setFillColorRGB(1, 1, 1)
+            self.c.rect(x - folga, y - 2.2, w + 2 * folga, tam + 1.4, stroke=0, fill=1)
+            self.c.setFillColorRGB(0, 0, 0)
+            self.txt(texto, x, y, tam, negrito)
+        self.rotulos = []
+
+    def grupo(self, chave, rotulo, x0, y0, x1, y1, tam=7, base=None, r=6):
+        """Caixa arredondada com rótulo na borda superior; registra o ponto
+        de escrita logo abaixo do rótulo."""
+        self.arred(x0, y0, x1, y1, r)
+        if rotulo:
+            self.rotulo_borda(rotulo, x0 + 14, y1 - 3.5, tam)
+        if chave:
+            b = base if base is not None else y0 + 4.5
+            self.campos[chave] = {'x': round(x0 + 4, 1), 'y': round(b, 1),
+                                  'w': round(x1 - x0 - 8, 1)}
+
+    def celulas(self, chave, x0, x1, y0, y1, n, dy=4.0):
+        """Grade de n células de caractere. Registra os limites."""
+        self.ret(x0, y0, x1, y1)
+        passo = (x1 - x0) / n
+        limites = [round(x0 + i * passo, 2) for i in range(n + 1)]
+        self.c.setLineWidth(0.6)
+        for i in range(1, n):
+            x = x0 + i * passo
+            self.c.line(x, y0, x, y0 + (y1 - y0) * 0.62)
+        if chave:
+            self.campos[chave] = {'b': limites, 'y': round(y0, 1), 'dy': dy}
+        return limites
+
+    def caixinha(self, chave, x, y, lado=5.7):
+        """Quadradinho de marcação. Registra o centro e a linha de base do X."""
+        self.c.setLineWidth(0.8)
+        self.c.rect(x, y, lado, lado)
+        if chave:
+            self.campos[chave] = [round(x + lado / 2, 2), round(y + lado / 2 - 2.85, 2)]
+        return x + lado + 2.5
 
 
 # ------------------------------------------------------- requisição de exames
@@ -309,6 +366,44 @@ def controle_especial(destino):
     return {'pagina': [842, 595], 'campos': campos}
 
 
+# ------------------------------------------------------- outros documentos
+
+def outros_documentos(destino):
+    """Folha livre em A5: identificação do paciente, um campo de teor e espaço
+    de assinatura. Serve para atestado, declaração, relatório — o que não tem
+    formulário próprio."""
+    campos = {}
+    c = canvas.Canvas(destino, pagesize=(420, 595))
+    f = Folha(c, campos)
+    E, D = 16, 404
+
+    f.cabecalho(E, 540, D, 578, 'DOCUMENTO')
+
+    f.celula('nome', 'Nome do paciente:', E, 512, D, 540)
+    f.celula('data', 'Data:', E, 486, 215, 512)
+    f.celula('prontuario', 'Prontuário:', 215, 486, D, 512)
+
+    # corpo: teor em cima, assinatura embaixo
+    f.ret(E, 108, D, 480)
+    campos['titulo'] = {'x': (E + D) / 2, 'y': 462.0, 'w': D - E - 24}
+    campos['teor'] = [24.0, 176.0, 396.0, 470.0]
+    campos['teorComTitulo'] = [24.0, 176.0, 396.0, 450.0]
+
+    f.linha(122, 150, 298, 150, 0.7)
+    campos['assinaturaNome'] = {'x': (E + D) / 2, 'y': 139.0, 'w': 240.0}
+    campos['assinaturaRegistro'] = {'x': (E + D) / 2, 'y': 129.0, 'w': 260.0}
+
+    cx = (E + D) / 2
+    f.txtc(CNPJ, cx, 92, 7.5, negrito=True)
+    f.txtc(ENDERECO, cx, 83, 6.5)
+    f.txtc(TELEFONE, cx, 74, 6.5)
+    f.rodape('Hospital Universitário Lauro Wanderley – UFPB', cx, 58)
+
+    c.showPage()
+    c.save()
+    return {'pagina': [420, 595], 'campos': campos}
+
+
 # ------------------------------------------------------------------------ main
 
 def main():
@@ -318,6 +413,7 @@ def main():
         'receituario-simples': receituario_simples(os.path.join(PDF, 'receituario-simples.pdf')),
         'receituario-controle-especial': controle_especial(
             os.path.join(PDF, 'receituario-controle-especial.pdf')),
+        'outros-documentos': outros_documentos(os.path.join(PDF, 'outros-documentos.pdf')),
     }
     destino = os.path.join(RAIZ, 'ferramentas', 'coordenadas.json')
     with open(destino, 'w', encoding='utf-8') as fp:

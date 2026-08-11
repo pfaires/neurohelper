@@ -7,9 +7,17 @@
    { id, rotulo, tipo, larg, mascara, max, linhas, modo, exemplo, dica,
      valor, obrigatorio, opcoes, valida, erro }
 
-   tipo: 'texto' (padrão) | 'area' | 'caixa' | 'radio'
+   tipo: 'texto' (padrão) | 'area' | 'caixa' | 'radio' | 'lista' | 'linhas'
    larg: 1 a 12 colunas da grade
-   valida: function (valor) → true se está bom */
+   valida: function (valor) → true se está bom
+
+   'lista'  combobox que também aceita escrita livre. As sugestões vêm de um
+            JSON externo (`listaUrl`), carregado depois da montagem — o campo
+            funciona mesmo que o arquivo não chegue.
+
+   'linhas' tabela de linhas repetidas, para listas com colunas. O valor é um
+            array de objetos. Declara `colunas` (cada uma um campo simplificado),
+            `max` de linhas e `rotuloAcrescentar`. */
 
 window.Campos = (function () {
   'use strict';
@@ -47,18 +55,137 @@ window.Campos = (function () {
         dica + '</div>';
     }
 
+    if (c.tipo === 'linhas') {
+      return '<div class="campo ' + larg + '">' +
+        '<label>' + c.rotulo + '</label>' +
+        htmlLinhas(cid, c) + dica + msg + '</div>';
+    }
+
+    var controle = htmlControle(cid, c);
+    var lista = c.tipo === 'lista' ? '<datalist id="dl-' + cid + '"></datalist>' : '';
+
+    return '<div class="campo ' + larg + '">' +
+      '<label for="' + cid + '">' + c.rotulo + '</label>' + controle + lista + dica + msg + '</div>';
+  }
+
+  // controle solto, reaproveitado pelas colunas de `linhas`
+  function htmlControle(cid, c) {
     var attrs = 'id="' + cid + '" autocomplete="off"';
     if (c.mascara) attrs += ' data-mascara="' + c.mascara + '"';
     if (c.max) attrs += ' maxlength="' + c.max + '"';
     if (c.exemplo) attrs += ' placeholder="' + escapar(c.exemplo) + '"';
     if (c.modo) attrs += ' inputmode="' + c.modo + '"';
+    if (c.tipo === 'lista') attrs += ' list="dl-' + (c.listaDe || cid) + '"';
 
-    var controle = c.tipo === 'area'
-      ? '<textarea ' + attrs + ' rows="' + (c.linhas || 6) + '"></textarea>'
-      : '<input type="text" ' + attrs + '>';
+    if (c.tipo === 'area') {
+      return '<textarea ' + attrs + ' rows="' + (c.linhas || 6) + '"></textarea>';
+    }
+    return '<input type="text" ' + attrs + '>';
+  }
 
-    return '<div class="campo ' + larg + '">' +
-      '<label for="' + cid + '">' + c.rotulo + '</label>' + controle + dica + msg + '</div>';
+  // ------------------------------------------------------------------ linhas
+
+  function htmlCabecalhoLinhas(c) {
+    return '<div class="linha-item linha-cabecalho">' +
+      '<span class="linha-num"></span>' +
+      c.colunas.map(function (col) {
+        return '<span class="linha-col" style="' + estiloCol(col) + '">' +
+          escapar(col.rotulo || '') + '</span>';
+      }).join('') +
+      '<span class="linha-acao"></span></div>';
+  }
+
+  function estiloCol(col) {
+    return col.largura ? 'flex:0 0 ' + col.largura : 'flex:1 1 auto';
+  }
+
+  function htmlLinha(cid, c, i) {
+    var lista = c.colunas.filter(function (col) { return col.tipo === 'lista'; })[0];
+    return '<div class="linha-item" data-linha="' + i + '">' +
+      '<span class="linha-num">' + (i + 1) + '</span>' +
+      c.colunas.map(function (col) {
+        var sub = {};
+        Object.keys(col).forEach(function (k) { sub[k] = col[k]; });
+        if (sub.tipo === 'lista') sub.listaDe = cid;
+        return '<span class="linha-col" style="' + estiloCol(col) + '">' +
+          htmlControle(cid + '__' + i + '__' + col.id, sub) + '</span>';
+      }).join('') +
+      '<span class="linha-acao">' +
+        '<button type="button" class="btn-linha" data-remover="' + i + '" ' +
+        'title="Remover esta linha" aria-label="Remover linha">×</button>' +
+      '</span></div>';
+  }
+
+  function htmlLinhas(cid, c) {
+    var lista = c.colunas.filter(function (col) { return col.tipo === 'lista'; })[0];
+    return '<div class="linhas" id="' + cid + '" data-max="' + (c.max || 6) + '">' +
+      (lista ? '<datalist id="dl-' + cid + '"></datalist>' : '') +
+      htmlCabecalhoLinhas(c) +
+      '<div class="linhas-corpo"></div>' +
+      '<button type="button" class="btn-mini btn-acrescentar">' +
+        escapar(c.rotuloAcrescentar || 'Acrescentar linha') + '</button>' +
+      '</div>';
+  }
+
+  function linhasDe(raiz, cid) {
+    var caixa = raiz.querySelector('#' + cid);
+    return caixa ? Array.prototype.slice.call(
+      caixa.querySelectorAll('.linhas-corpo .linha-item')) : [];
+  }
+
+  /* Redesenha as linhas a partir de um array de valores, sempre com pelo menos
+     uma linha visível. */
+  function montarLinhas(raiz, prefixo, c, valores) {
+    var cid = idDe(prefixo, c);
+    var caixa = raiz.querySelector('#' + cid);
+    if (!caixa) return;
+    var corpo = caixa.querySelector('.linhas-corpo');
+    var max = +caixa.dataset.max || 6;
+    var linhas = (valores && valores.length ? valores : [{}]).slice(0, max);
+
+    corpo.innerHTML = linhas.map(function (_, i) { return htmlLinha(cid, c, i); }).join('');
+
+    linhas.forEach(function (v, i) {
+      c.colunas.forEach(function (col) {
+        var el = raiz.querySelector('#' + cid + '__' + i + '__' + col.id);
+        if (el) el.value = (v && v[col.id] !== undefined && v[col.id] !== null) ? v[col.id] : '';
+      });
+    });
+
+    ligarMascarasEm(caixa, prefixo, raiz);
+    atualizarBotaoLinhas(caixa, max);
+
+    Array.prototype.forEach.call(caixa.querySelectorAll('[data-remover]'), function (b) {
+      b.addEventListener('click', function () {
+        var atuais = lerLinhas(raiz, prefixo, c);
+        atuais.splice(+b.dataset.remover, 1);
+        montarLinhas(raiz, prefixo, c, atuais);
+      });
+    });
+  }
+
+  function atualizarBotaoLinhas(caixa, max) {
+    var n = caixa.querySelectorAll('.linhas-corpo .linha-item').length;
+    var botao = caixa.querySelector('.btn-acrescentar');
+    if (botao) botao.hidden = n >= max;
+  }
+
+  /* Lê todas as linhas, inclusive as em branco — quem descarta é o `ler`. */
+  function lerLinhas(raiz, prefixo, c) {
+    var cid = idDe(prefixo, c);
+    return linhasDe(raiz, cid).map(function (linha) {
+      var i = linha.dataset.linha;
+      var v = {};
+      c.colunas.forEach(function (col) {
+        var el = raiz.querySelector('#' + cid + '__' + i + '__' + col.id);
+        v[col.id] = el ? el.value : '';
+      });
+      return v;
+    });
+  }
+
+  function vazia(v, c) {
+    return c.colunas.every(function (col) { return !String(v[col.id] || '').trim(); });
   }
 
   function html(prefixo, campos) {
@@ -79,8 +206,10 @@ window.Campos = (function () {
     };
   }
 
-  function ligar(raiz, prefixo) {
-    Array.prototype.forEach.call(raiz.querySelectorAll('[data-mascara]'), function (el) {
+  /* Liga máscara e limpeza de erro dentro de um pedaço da árvore. Usado tanto
+     no bloco inteiro quanto nas linhas redesenhadas. */
+  function ligarMascarasEm(caixa, prefixo, raiz) {
+    Array.prototype.forEach.call(caixa.querySelectorAll('[data-mascara]'), function (el) {
       el.addEventListener('input', function () {
         var fim = el.selectionStart === el.value.length;
         var f = funcaoMascara(el, prefixo, raiz);
@@ -88,12 +217,66 @@ window.Campos = (function () {
         if (fim) { try { el.setSelectionRange(el.value.length, el.value.length); } catch (e) { /* textarea */ } }
       });
     });
-    Array.prototype.forEach.call(raiz.querySelectorAll('input, textarea'), function (el) {
+    Array.prototype.forEach.call(caixa.querySelectorAll('input, textarea'), function (el) {
       el.addEventListener('input', function () {
         var c = el.closest('.campo');
         if (c) c.classList.remove('erro');
       });
     });
+  }
+
+  /* Preenche as sugestões de um combobox. O campo já funciona antes disso —
+     a lista é conveniência, a digitação livre é sempre permitida. */
+  var listasCarregadas = {};
+  /* Sugestões escritas direto na declaração do campo, sem arquivo à parte. */
+  function preencherLista(alvo, itens) {
+    if (!alvo || !itens || !itens.length) return;
+    alvo.innerHTML = itens.map(function (i) {
+      return '<option value="' + escapar(i) + '"></option>';
+    }).join('');
+  }
+
+  function carregarLista(url, alvo) {
+    if (!url || !alvo) return;
+    if (!listasCarregadas[url]) {
+      listasCarregadas[url] = fetch(url)
+        .then(function (r) { return r.ok ? r.json() : []; })
+        .catch(function () { return []; });
+    }
+    listasCarregadas[url].then(function (itens) {
+      if (!itens || !itens.length) return;
+      alvo.innerHTML = itens.map(function (i) {
+        return '<option value="' + escapar(i) + '"></option>';
+      }).join('');
+    });
+  }
+
+  function ligar(raiz, prefixo, campos) {
+    ligarMascarasEm(raiz, prefixo, raiz);
+
+    (campos || []).forEach(function (c) {
+      var cid = idDe(prefixo, c);
+
+      if (c.tipo === 'lista') {
+        var dl = raiz.querySelector('#dl-' + cid);
+        if (c.listaUrl) carregarLista(c.listaUrl, dl);
+        else if (dl && c.opcoes) preencherLista(dl, c.opcoes);
+      }
+
+      if (c.tipo === 'linhas') {
+        var caixa = raiz.querySelector('#' + cid);
+        if (!caixa) return;
+        var lista = c.colunas.filter(function (col) { return col.tipo === 'lista'; })[0];
+        if (lista) carregarLista(lista.listaUrl, raiz.querySelector('#dl-' + cid));
+        montarLinhas(raiz, prefixo, c, []);
+        caixa.querySelector('.btn-acrescentar').addEventListener('click', function () {
+          var atuais = lerLinhas(raiz, prefixo, c);
+          atuais.push({});
+          montarLinhas(raiz, prefixo, c, atuais);
+        });
+      }
+    });
+
     // trocar CNS/CPF reformata o número já digitado
     Array.prototype.forEach.call(
       raiz.querySelectorAll('input[name="' + prefixo + '__tipoDoc"]'), function (r) {
@@ -118,6 +301,10 @@ window.Campos = (function () {
       } else if (c.tipo === 'caixa') {
         var cx = raiz.querySelector('#' + cid);
         v[c.id] = !!(cx && cx.checked);
+      } else if (c.tipo === 'linhas') {
+        v[c.id] = lerLinhas(raiz, prefixo, c).filter(function (linha) {
+          return !vazia(linha, c);
+        });
       } else {
         var el = raiz.querySelector('#' + cid);
         v[c.id] = el ? el.value : '';
@@ -145,6 +332,8 @@ window.Campos = (function () {
       } else if (c.tipo === 'caixa') {
         var cx = raiz.querySelector('#' + cid);
         if (cx) cx.checked = !!valor;
+      } else if (c.tipo === 'linhas') {
+        montarLinhas(raiz, prefixo, c, Array.isArray(valor) ? valor : []);
       } else {
         var el = raiz.querySelector('#' + cid);
         if (el) el.value = valor === undefined || valor === null ? '' : valor;
@@ -172,6 +361,18 @@ window.Campos = (function () {
 
     campos.forEach(function (c) {
       if (c.tipo === 'caixa' || c.tipo === 'radio') return;
+
+      if (c.tipo === 'linhas') {
+        if (!c.obrigatorio) return;
+        var preenchidas = lerLinhas(raiz, prefixo, c).filter(function (l) { return !vazia(l, c); });
+        if (preenchidas.length) return;
+        var caixa = raiz.querySelector('#' + idDe(prefixo, c));
+        var primeiro = caixa && caixa.querySelector('input');
+        if (caixa && caixa.closest('.campo')) caixa.closest('.campo').classList.add('erro');
+        if (primeiro) falhas.push(primeiro);
+        return;
+      }
+
       var el = raiz.querySelector('#' + idDe(prefixo, c));
       if (!el) return;
       var v = String(valores[c.id] || '').trim();

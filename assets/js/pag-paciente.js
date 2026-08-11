@@ -13,7 +13,7 @@
 
   var raiz = document.getElementById('campos-paciente');
   raiz.innerHTML = C.html('paciente', C.PACIENTE);
-  C.ligar(document, 'paciente');
+  C.ligar(document, 'paciente', C.PACIENTE);
 
   var atendimento = D.lerAtendimento();
   var editando = !!atendimento;

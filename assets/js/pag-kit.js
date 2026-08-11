@@ -42,7 +42,7 @@
     if (comuns.length) {
       $('#bloco-comuns').hidden = false;
       document.getElementById('campos-comuns').innerHTML = C.html('kit', comuns);
-      C.ligar(document, 'kit');
+      C.ligar(document, 'kit', comuns);
       C.aplicar(document, 'kit', comuns, {});
     }
 

@@ -74,6 +74,8 @@ assets/js/pag-*.js           script de cada página
 | Requisição de exames (LAC-001) | A5 paisagem | redesenhado |
 | Receituário simples | A5 retrato | redesenhado |
 | Receituário de controle especial | A4 paisagem, duas vias | redesenhado |
+| LME — solicitação de medicamentos | A4 retrato | oficial do SUS |
+| Outros documentos | A5 retrato | redesenhado |
 
 Campos preenchidos em cada um:
 
@@ -82,6 +84,60 @@ Campos preenchidos em cada um:
 - **Requisição de exames** — nome, prontuário, idade (calculada), sexo, cartão social, enfermaria, leito, dados clínicos, urgência, justificativa, material e exames.
 - **Receituário simples** — nome, data, prontuário e prescrição.
 - **Receituário de controle especial** — paciente (com CPF entre parênteses, se informado), endereço, prescrição e data, iguais nas duas vias.
+- **Outros documentos** — folha livre para atestado, declaração, relatório, encaminhamento. Título impresso (opcional, sai em maiúsculas), teor e assinatura. A opção *imprimir nome e registro do prescritor* pode ser desmarcada por quem prefere só carimbar: sai apenas a linha, com a legenda embaixo.
+
+- **LME** — 1 e 2 (fixos), 3.1, 3.2, 4 a 6, 7 e 8 (até seis medicamentos com as quantidades dos seis meses), 9 a 16, 18 a 22. As assinaturas (17 e 23) ficam em branco.
+
+É o modelo oficial **simplificado**, sem as grades de caractere da versão anterior: CNES, CNS, CPF e telefone são campos de texto corrido. Traz também o nome social do paciente (campo 3.2), que na versão antiga não existia.
+
+> **Ao mapear coordenadas por extração**, lembre que bibliotecas como o pdfplumber
+> informam o rodapé da caixa da fonte, não a linha de base: ela fica `0,207 × corpo`
+> acima. Ignorar isso faz o texto preenchido sair cerca de 2 pt abaixo do rótulo do
+> formulário — sutil na tela, evidente no papel.
+
+## Formatação nos campos longos
+
+Justificativa, anamnese, prescrição, teor — todo campo de texto longo aceita um
+subconjunto de markdown, propositalmente estreito para não surpreender quem escreve
+texto corrido:
+
+| Escrita | Resultado |
+|---|---|
+| `**assim**` ou `__assim__` | negrito |
+| `*assim*` ou `_assim_` | itálico |
+| `#`, `##`, `###` no começo da linha | título (corpo maior, negrito) |
+| `-`, `*`, `+` no começo da linha | item com marcador |
+| `1.` ou `1)` no começo da linha | item numerado |
+| `> ` no começo da linha | citação recuada, em itálico |
+| linha só com `---` | fio horizontal |
+
+O itálico só vale quando abre e fecha na **mesma linha**, colado a caractere que não
+seja espaço: `12 * 3 * 4` continua saindo com os asteriscos. O fio horizontal só sai
+quando a linha inteira é feita de três ou mais traços iguais — uma receita com
+`Dipirona 500 mg ------ 20 comp.` não vira fio.
+
+As quebras de linha continuam sendo respeitadas, e o corpo ainda encolhe sozinho
+(até 7 pt) quando o texto não cabe na área do formulário.
+
+### Lista de medicamentos do LME
+
+`assets/dados/medicamentos-lme.json` traz os 344 itens do Componente Especializado,
+extraídos do campo de seleção da versão eletrônica oficial do formulário. O campo do
+medicamento é um combobox que sugere a lista mas **aceita escrita livre** — nomes fora
+da relação podem ser digitados normalmente. A lista é carregada sob demanda, só quando
+o LME é aberto.
+
+Para atualizar quando o Ministério revisar a relação, extraia de novo do PDF eletrônico:
+
+```
+python3 -c "
+from pypdf import PdfReader; import json
+r = PdfReader('Formulário LME - Eletrônico.pdf')
+opts = r.get_fields()['form_16_0']['/Opt']
+nomes = [o[0] if isinstance(o, (list, tuple)) else o for o in opts]
+json.dump([str(n).strip() for n in nomes if str(n).strip()],
+          open('assets/dados/medicamentos-lme.json', 'w'), ensure_ascii=False, indent=0)"
+```
 
 O bloco de identificação do médico (nome, título, CRM, RQE) fica guardado no cadastro
 mas ainda **não é impresso**: as áreas de assinatura saem em branco para carimbo físico.
@@ -128,9 +184,11 @@ município, UF e CEP, sem tocar no que não veio na cópia. Rótulos novos entra
 
 ## Modelos em branco
 
-Os dois formulários do SUS usam os PDFs oficiais. Os três do HULW só existiam
-digitalizados e foram redesenhados em vetor por `ferramentas/gerar-modelos.py`, com os
-logotipos atuais — HU Brasil no lugar de EBSERH. Para mudar o desenho:
+A mudança de procedimento, a APAC e o LME usam os PDFs oficiais direto. Os três
+formulários do HULW só existiam digitalizados e foram redesenhados em vetor por
+`ferramentas/gerar-modelos.py`, com os logotipos atuais — HU Brasil no lugar de EBSERH.
+
+Para mudar o desenho:
 
 ```
 python3 ferramentas/gerar-modelos.py
@@ -151,7 +209,9 @@ em nenhuma página.
 1. Coloque o modelo em branco em `assets/pdf/`.
 2. Crie `assets/js/doc-<id>.js` no molde dos existentes, declarando:
    - `folha`: `a4-retrato`, `a4-paisagem`, `a5-retrato` ou `a5-paisagem`;
-   - `campos`: os campos próprios, que a página de formulário renderiza sozinha;
+   - `campos`: os campos próprios, que a página de formulário renderiza sozinha
+     (`texto`, `area`, `caixa`, `radio`, `lista` para combobox com escrita livre e
+     `linhas` para tabelas repetidas, como os medicamentos do LME);
    - `tituloPadrao(dados)`: título automático da linha na tabela;
    - `preencher(pincel, dados, api)`: desenha sobre o modelo.
 3. Acrescente a tag `<script>` em `atendimento.html`, `formulario.html`, `kit.html` e
