@@ -26,7 +26,8 @@
 
   var SUGESTOES = [
     'Atestado', 'Declaração de comparecimento', 'Relatório médico',
-    'Encaminhamento', 'Solicitação', 'Justificativa', 'Orientações'
+    'Laudo médico', 'Contrarreferência', 'Encaminhamento', 'Solicitação',
+    'Justificativa', 'Orientações'
   ];
 
   /* "Neurologista · CRM-PB 12345 · RQE 678" — só o que existir. */
