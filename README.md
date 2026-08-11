@@ -119,6 +119,12 @@ quando a linha inteira é feita de três ou mais traços iguais — uma receita 
 As quebras de linha continuam sendo respeitadas, e o corpo ainda encolhe sozinho
 (até 7 pt) quando o texto não cabe na área do formulário.
 
+> **Ao embarcar páginas de um PDF em outro**, libere o documento de origem antes
+> (`await doc.flush()`). As fontes do pdf-lib só entram no arquivo nesse momento;
+> antes disso o dicionário de recursos aponta para objetos que ainda não existem.
+> `copyPages()` faz o flush sozinho, `embedPages()` não — e o sintoma é silencioso:
+> o texto sai, mas em fonte padrão, sem negrito nem itálico.
+
 ### Lista de medicamentos do LME
 
 `assets/dados/medicamentos-lme.json` traz os 344 itens do Componente Especializado,

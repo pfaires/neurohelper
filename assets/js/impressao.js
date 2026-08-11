@@ -34,15 +34,25 @@ window.Impressao = (function () {
 
   function meia(folha) { return FORMATOS_MEIOS.indexOf(folha) >= 0; }
 
-  /* Preenche todos os documentos, em sequência para não disputar memória. */
+  /* Preenche todos os documentos, em sequência para não disputar memória.
+
+     O flush() no fim não é enfeite. As fontes que o pdf-lib "embarca" só entram
+     de fato no arquivo quando o documento é liberado — até lá o dicionário de
+     recursos da página aponta para objetos que ainda não existem. copyPages()
+     libera a origem sozinho, mas embedPages() não: sem o flush, a página de
+     meia folha era copiada com as referências penduradas e o leitor caía numa
+     fonte padrão, apagando negrito e itálico. Daí o markdown sumir só ao
+     agrupar. */
   function preencherTodos(itens) {
     var cortou = false;
     return itens.reduce(function (p, item) {
       return p.then(function (acc) {
         return L.preencher(item.documento, item.dados).then(function (r) {
           cortou = cortou || r.cortou;
-          acc.push({ documento: item.documento, doc: r.doc });
-          return acc;
+          return Promise.resolve(r.doc.flush()).then(function () {
+            acc.push({ documento: item.documento, doc: r.doc });
+            return acc;
+          });
         });
       });
     }, Promise.resolve([])).then(function (feitos) {
