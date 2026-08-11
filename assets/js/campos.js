@@ -62,6 +62,14 @@ window.Campos = (function () {
     }
 
     var controle = htmlControle(cid, c);
+
+    /* Campo longo ganha a barra de formatação, a menos que o documento peça o
+       contrário — na requisição de exames, por exemplo, cada linha vira um item
+       de coluna e markdown ali só atrapalharia. */
+    if (c.tipo === 'area' && c.markdown !== false && window.EditorMarkdown) {
+      controle = window.EditorMarkdown.barra(cid) + controle + window.EditorMarkdown.fim();
+    }
+
     var lista = c.tipo === 'lista' ? '<datalist id="dl-' + cid + '"></datalist>' : '';
 
     return '<div class="campo ' + larg + '">' +
@@ -253,6 +261,7 @@ window.Campos = (function () {
 
   function ligar(raiz, prefixo, campos) {
     ligarMascarasEm(raiz, prefixo, raiz);
+    if (window.EditorMarkdown) window.EditorMarkdown.ligar(raiz);
 
     (campos || []).forEach(function (c) {
       var cid = idDe(prefixo, c);
@@ -339,6 +348,9 @@ window.Campos = (function () {
         if (el) el.value = valor === undefined || valor === null ? '' : valor;
       }
     });
+
+    // o modo visual do editor precisa redesenhar o que acabou de chegar
+    if (window.EditorMarkdown) window.EditorMarkdown.sincronizar(raiz);
   }
 
   function limpar(raiz, prefixo, campos) {
@@ -351,6 +363,14 @@ window.Campos = (function () {
   // --------------------------------------------------------------- validar
 
   /* Devolve os elementos com problema, já marcados em vermelho. */
+  /* No modo visual do editor o textarea fica escondido: rolar até ele não
+     move a tela. Devolve o painel que está realmente à vista. */
+  function visivel(el) {
+    if (el.offsetParent !== null) return el;
+    var caixa = el.closest && el.closest('.editor-md');
+    return (caixa && caixa.querySelector('.visual-md:not([hidden])')) || el;
+  }
+
   function validar(raiz, prefixo, campos) {
     Array.prototype.forEach.call(raiz.querySelectorAll('.campo.erro'), function (c) {
       c.classList.remove('erro');
@@ -380,7 +400,7 @@ window.Campos = (function () {
       if (ruim) {
         var caixa = el.closest('.campo');
         if (caixa) caixa.classList.add('erro');
-        falhas.push(el);
+        falhas.push(visivel(el));
       }
     });
 

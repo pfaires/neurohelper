@@ -62,8 +62,8 @@
 
       { id: 'teor', rotulo: 'Teor', tipo: 'area', larg: 12,
         max: 4000, linhas: 12, obrigatorio: true,
-        dica: 'Aceita markdown: **negrito**, *itálico*, ## títulos, listas com "-" e ' +
-              'numeradas. As quebras de linha são mantidas.' }
+        dica: 'Use os botões acima ou escreva markdown direto. ' +
+              'As quebras de linha são mantidas no PDF.' }
     ],
 
     preencher: function (p, d) {

@@ -6,7 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 
-const SITE = '/sessions/gallant-relaxed-planck/mnt/site';
+const SITE = path.resolve(__dirname, '..', '..', 'assets', 'js');
 const LARG = JSON.parse(fs.readFileSync(path.join(__dirname, 'helv.json'), 'utf8'));
 
 function larguraDe(nome, texto, tam) {
@@ -77,7 +77,7 @@ ctx.Promise = Promise;
 ctx.fetch = janela.fetch;
 
 for (const f of ['markdown.js', 'pdf-comum.js', 'doc-outros.js', 'doc-receituario-simples.js']) {
-  vm.runInContext(fs.readFileSync(path.join(SITE, 'assets/js', f), 'utf8'), ctx, { filename: f });
+  vm.runInContext(fs.readFileSync(path.join(SITE, f), 'utf8'), ctx, { filename: f });
 }
 
 function mod(id) { return janela.Laudos.documentos.filter(d => d.id === id)[0]; }

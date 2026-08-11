@@ -75,6 +75,7 @@
         max: 500, linhas: 3 },
       { id: 'material', rotulo: 'Material a examinar', tipo: 'texto', larg: 12, max: 90 },
       { id: 'exames', rotulo: 'Exames', tipo: 'area', larg: 12, max: 900, linhas: 5,
+        markdown: false,   // cada linha vira um item de coluna, não texto corrido
         obrigatorio: true,
         dica: 'Um exame por linha. No PDF eles são distribuídos em colunas de até sete, da esquerda para a direita.' }
     ],

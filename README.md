@@ -119,6 +119,33 @@ quando a linha inteira é feita de três ou mais traços iguais — uma receita 
 As quebras de linha continuam sendo respeitadas, e o corpo ainda encolhe sozinho
 (até 7 pt) quando o texto não cabe na área do formulário.
 
+### Os dois modos de edição
+
+Todo campo longo tem uma barra com negrito, itálico, título, lista, lista
+numerada, citação e fio, e uma chave **Visual | Markdown**:
+
+- **Visual** é um `contenteditable`: os marcadores aparecem como marcadores, não
+  como asteriscos. É o modo de quem nunca ouviu falar de markdown, e o que abre
+  por padrão.
+- **Markdown** é o `<textarea>` cru, para quem já escreve assim ou quer conferir
+  o que está gravado.
+
+A escolha fica gravada na máquina (`neurohelper.editorModo`).
+
+O `<textarea>` é sempre a fonte da verdade: o modo visual escreve de volta nele a
+cada tecla. Nada mais no site sabe que o editor existe — `Campos.ler` continua
+lendo o campo e o gerador continua recebendo markdown puro.
+
+O modo visual oferece **exatamente** o subconjunto que o PDF imprime, de
+propósito. Uma barra com tabela ou link deixaria a pessoa escrever algo que sai
+em branco no papel. Pelo mesmo motivo, colar traz só o texto: fonte, cor e tabela
+vindas de outro programa não teriam como ser impressas.
+
+`node ferramentas/provas/prova-editor.js` garante o que mais importa aqui: passar
+pelo modo visual não altera o texto. Markdown → DOM → markdown tem de devolver
+byte a byte o que entrou, senão o simples ato de olhar o campo estragaria o
+documento.
+
 > **Ao embarcar páginas de um PDF em outro**, libere o documento de origem antes
 > (`await doc.flush()`). As fontes do pdf-lib só entram no arquivo nesse momento;
 > antes disso o dicionário de recursos aponta para objetos que ainda não existem.

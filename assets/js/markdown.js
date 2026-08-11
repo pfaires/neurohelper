@@ -100,9 +100,8 @@ window.Markdown = (function () {
 
       m = CITACAO.exec(linha);
       if (m) {
-        saida.push({ tipo: 'citacao', recuo: 12, partes: trechos(m[1]).map(function (p) {
-          return { t: p.t, n: p.n, i: true };
-        }) });
+        saida.push({ tipo: 'citacao', recuo: 12, forcarItalico: true,
+                     partes: trechos(m[1]) });
         return;
       }
 

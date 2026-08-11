@@ -551,3 +551,100 @@ code {
   .linha-col { flex: 1 1 60px !important; }
   .linha-col:first-of-type { flex: 1 1 100% !important; }
 }
+
+/* ------------------------------------------- barra de formatação (markdown) */
+
+.editor-md { display: flex; flex-direction: column; }
+
+.barra-md {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 5px;
+  border: 1px solid var(--borda);
+  border-bottom: 0;
+  border-radius: 6px 6px 0 0;
+  background: linear-gradient(var(--branco), var(--azul-fundo));
+}
+
+.btn-md {
+  min-width: 28px;
+  height: 26px;
+  padding: 0 7px;
+  font: inherit;
+  font-size: .85rem;
+  line-height: 1;
+  color: var(--azul);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.btn-md:hover { background: var(--branco); border-color: var(--borda); }
+.btn-md:focus-visible { outline: 2px solid var(--azul-claro); outline-offset: -1px; }
+.btn-md b, .btn-md i { font-size: .95rem; }
+
+/* chave Visual | Markdown */
+.modo-md {
+  margin-left: auto;
+  display: flex;
+  border: 1px solid var(--borda);
+  border-radius: 5px;
+  overflow: hidden;
+  background: var(--branco);
+}
+.btn-modo {
+  height: 24px;
+  padding: 0 9px;
+  font: inherit;
+  font-size: .72rem;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--cinza);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+.btn-modo + .btn-modo { border-left: 1px solid var(--borda); }
+.btn-modo:hover { color: var(--azul); }
+.btn-modo.ativo { background: var(--azul); color: var(--branco); }
+
+.editor-md textarea { border-radius: 0 0 6px 6px; }
+.editor-md textarea[hidden] { display: none; }
+
+/* painel de edição visual: mesma moldura e mesma altura do campo */
+.visual-md {
+  min-height: 120px;
+  padding: 9px 11px;
+  font-size: .92rem;
+  line-height: 1.45;
+  border: 1px solid var(--borda);
+  border-radius: 0 0 6px 6px;
+  background: var(--branco);
+  overflow-wrap: anywhere;
+  resize: vertical;
+  overflow: auto;
+}
+.visual-md:focus { outline: 2px solid var(--azul-claro); outline-offset: -1px; border-color: var(--azul-claro); }
+.visual-md > * { margin: 0; }
+.visual-md > * + * { margin-top: .12em; }
+.visual-md h2, .visual-md h3, .visual-md h4 {
+  margin: .25em 0 .1em;
+  color: var(--azul);
+  line-height: 1.3;
+}
+.visual-md h2 { font-size: 1.2em; }
+.visual-md h3 { font-size: 1.08em; }
+.visual-md h4 { font-size: 1em; }
+.visual-md ul, .visual-md ol { margin: 0; padding-left: 1.6em; }
+.visual-md blockquote {
+  margin: 0;
+  padding-left: 10px;
+  border-left: 3px solid var(--borda);
+  color: var(--cinza);
+  font-style: italic;
+}
+.visual-md hr { margin: .5em 0; border: 0; border-top: 1px solid var(--borda); }
+
+.campo.erro .barra-md, .campo.erro .visual-md { border-color: var(--erro); }

@@ -168,12 +168,13 @@ window.Laudos = (function () {
     /* Um bloco de texto longo é interpretado como markdown (ver markdown.js).
        Texto sem marcação nenhuma sai exatamente como texto corrido. */
 
-    function fatias(partes, forcarNegrito) {
+    function fatias(partes, forcarNegrito, forcarItalico) {
       var toks = [];
       (partes || []).forEach(function (p) {
         String(p.t).split(/(\s+)/).forEach(function (s) {
           if (!s) return;
-          toks.push({ t: s, n: p.n || forcarNegrito, i: p.i, esp: /^\s+$/.test(s) });
+          toks.push({ t: s, n: p.n || forcarNegrito, i: p.i || forcarItalico,
+                      esp: /^\s+$/.test(s) });
         });
       });
       return toks;
@@ -212,7 +213,7 @@ window.Laudos = (function () {
 
         var t = tam * (b.escala || 1);
         var recuo = b.recuo || 0;
-        var toks = fatias(b.partes, negBase || b.forcarNegrito);
+        var toks = fatias(b.partes, negBase || b.forcarNegrito, b.forcarItalico);
         var qs = quebrarTokens(toks, t, largura - recuo);
         if (!qs.length) qs = [[]];
         qs.forEach(function (ln, k) {

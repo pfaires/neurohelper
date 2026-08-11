@@ -9,7 +9,7 @@ const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 
-const SITE = '/sessions/gallant-relaxed-planck/mnt/site';
+const SITE = path.resolve(__dirname, '..', '..', 'assets', 'js');
 const LARG = JSON.parse(fs.readFileSync(path.join(__dirname, 'helv.json'), 'utf8'));
 
 function largura(nome, texto, tam) {
@@ -112,7 +112,7 @@ ctx.fetch = janela.fetch;
 
 for (const f of ['markdown.js', 'pdf-comum.js', 'doc-outros.js',
                  'doc-receituario-simples.js', 'doc-requisicao-exames.js', 'impressao.js']) {
-  vm.runInContext(fs.readFileSync(path.join(SITE, 'assets/js', f), 'utf8'), ctx, { filename: f });
+  vm.runInContext(fs.readFileSync(path.join(SITE, f), 'utf8'), ctx, { filename: f });
 }
 
 // mede texto de verdade, senão o markdown não consegue quebrar linha
