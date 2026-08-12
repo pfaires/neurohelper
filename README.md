@@ -65,6 +65,23 @@ assets/js/ambulatorios.js    conteúdo dos ambulatórios
 assets/js/pag-*.js           script de cada página
 ```
 
+## Ordem dos documentos
+
+A tabela do atendimento é arrastável pela alça `⠿`. A ordem não é enfeite: ela
+define a sequência de impressão e, com o agrupamento ligado, quais documentos de
+meia página dividem a mesma folha de papel. Por isso a coluna **Folha** mostra
+onde cada um cai, e o fundo alternado marca quem sai junto — arrastar sem esse
+retorno seria às cegas.
+
+A mesma alça anda com as setas do teclado quando está em foco, já que arrastar
+não funciona nem com o dedo nem sem mouse.
+
+Um detalhe que rendeu prova: uma meia página pode entrar numa folha **aberta
+várias posições atrás**, então a ordem das folhas não acompanha a das linhas.
+Com `[A5, A4, A5]` as folhas saem `1, 2, 1`. Montar o mapa percorrendo as folhas
+em sequência trocaria os números; `Impressao.folhaDeCada` carrega a posição
+original junto e devolve no índice certo.
+
 ## Documentos
 
 | Documento | Folha | Origem do modelo |

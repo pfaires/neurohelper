@@ -6,6 +6,7 @@ Provas de mesa em Node puro, sem dependência nenhuma. Rode a partir da raiz do 
 node ferramentas/provas/prova.js             markdown desenhado no PDF
 node ferramentas/provas/prova-impressao.js   agrupamento em meia folha
 node ferramentas/provas/prova-editor.js      ida e volta do modo visual
+node ferramentas/provas/prova-ordem.js       reordenação e mapa de folhas
 ```
 
 As duas primeiras usam um **pdf-lib de mentira**: em vez de gerar arquivo,
@@ -18,5 +19,8 @@ A terceira imita o mínimo de DOM que a serialização usa, inclusive as sujeira
 que os navegadores produzem sozinhos ao editar (`<b>`, `<span style>`, `<div>`
 solta, `<br>` de enchimento).
 
-`prova-impressao.js` e `prova-editor.js` saem com código diferente de zero
-quando falham; `prova.js` imprime o desenho para leitura.
+A quarta imita `localStorage` e `sessionStorage` com dois objetos, o bastante
+para exercitar a camada de armazenamento fora do navegador.
+
+Todas saem com código diferente de zero quando falham, menos `prova.js`, que
+imprime o desenho para leitura.

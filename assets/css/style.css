@@ -648,3 +648,48 @@ code {
 .visual-md hr { margin: .5em 0; border: 0; border-top: 1px solid var(--borda); }
 
 .campo.erro .barra-md, .campo.erro .visual-md { border-color: var(--erro); }
+
+/* --------------------------------------- reordenar documentos do atendimento */
+
+.tabela-documentos .col-mover {
+  width: 62px;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.btn-mover {
+  padding: 2px 4px;
+  font-size: 1rem;
+  line-height: 1;
+  color: var(--cinza);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  cursor: grab;
+  touch-action: none;
+}
+.btn-mover:hover { color: var(--azul); background: var(--azul-fundo); border-color: var(--borda); }
+.btn-mover:focus-visible { outline: 2px solid var(--azul-claro); outline-offset: 1px; }
+.btn-mover:active { cursor: grabbing; }
+
+.folha-num {
+  display: inline-block;
+  min-width: 20px;
+  margin-left: 4px;
+  padding: 1px 5px;
+  font-size: .72rem;
+  font-weight: 700;
+  text-align: center;
+  color: var(--azul);
+  background: var(--azul-fundo);
+  border: 1px solid var(--borda);
+  border-radius: 10px;
+}
+
+/* folhas alternadas ganham fundo diferente: dá para ver de relance quais
+   documentos vão sair no mesmo papel */
+.tabela-documentos tbody tr.folha-par { background: var(--azul-fundo); }
+.tabela-documentos tbody tr.arrastando { opacity: .45; }
+.tabela-documentos tbody tr { cursor: default; }
+
+.alca-exemplo { color: var(--cinza); }

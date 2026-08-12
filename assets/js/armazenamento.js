@@ -198,6 +198,27 @@ window.Dados = (function () {
     gravarAtendimento(a);
   }
 
+  /* Reordena pela lista de ids. A ordem não é enfeite: ela decide a sequência
+     de impressão e quais documentos de meia página dividem a mesma folha.
+     Qualquer id desconhecido é ignorado, e o que a lista não citar vai para o
+     fim, na ordem em que já estava. */
+  function reordenarDocumentos(ids) {
+    var a = lerAtendimento();
+    if (!a) return;
+
+    var porId = {};
+    a.documentos.forEach(function (d) { porId[d.id] = d; });
+
+    var novos = [];
+    (ids || []).forEach(function (id) {
+      if (porId[id]) { novos.push(porId[id]); delete porId[id]; }
+    });
+    a.documentos.forEach(function (d) { if (porId[d.id]) novos.push(d); });
+
+    a.documentos = novos;
+    gravarAtendimento(a);
+  }
+
   // acrescenta vários de uma vez (usado pelos kits)
   function acrescentarDocumentos(docs) {
     var a = lerAtendimento();
@@ -232,6 +253,7 @@ window.Dados = (function () {
     lerDocumento: lerDocumento,
     salvarDocumento: salvarDocumento,
     excluirDocumento: excluirDocumento,
+    reordenarDocumentos: reordenarDocumentos,
     acrescentarDocumentos: acrescentarDocumentos
   };
 })();

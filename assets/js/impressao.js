@@ -182,6 +182,21 @@ window.Impressao = (function () {
     return planejar(falsos, agrupar !== false).length;
   }
 
+  /* Em que folha cai cada documento, na ordem em que foram passados. É o que
+     dá sentido a reordenar a lista: mostra quem vai dividir papel com quem.
+
+     A ordem das folhas não acompanha a dos documentos — uma meia página pode
+     entrar numa folha aberta lá atrás —, por isso a posição vai junto e volta
+     no índice certo. */
+  function folhaDeCada(documentos, agrupar) {
+    var falsos = documentos.map(function (d, i) { return { documento: d, pos: i }; });
+    var mapa = new Array(documentos.length);
+    planejar(falsos, agrupar !== false).forEach(function (folha, k) {
+      folha.itens.forEach(function (item) { mapa[item.pos] = k + 1; });
+    });
+    return mapa;
+  }
+
   /* Junta paciente, prescritor ativo e campos próprios num objeto só,
      que é o que os módulos de documento esperam receber. */
   function dadosDe(docSalvo, atendimento, prescritor) {
@@ -218,6 +233,7 @@ window.Impressao = (function () {
   return {
     gerar: gerar,
     contarFolhas: contarFolhas,
+    folhaDeCada: folhaDeCada,
     meia: meia,
     dadosDe: dadosDe,
     itensDe: itensDe

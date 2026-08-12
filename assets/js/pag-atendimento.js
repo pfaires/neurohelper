@@ -49,6 +49,7 @@
 
   function desenharTabela() {
     var alvo = $('#tabela-documentos');
+    $('#dica-ordem').hidden = atendimento.documentos.length < 2;
     if (!atendimento.documentos.length) {
       alvo.innerHTML = '<p class="vazio">Nenhum documento gravado ainda. ' +
         'Use "adicionar documento" abaixo ou monte um kit pelos ambulatórios.</p>';
@@ -57,7 +58,13 @@
 
     var linhas = atendimento.documentos.map(function (s) {
       var m = modulo(s.tipo);
-      return '<tr>' +
+      return '<tr data-id="' + esc(s.id) + '">' +
+        '<td class="col-mover">' +
+          '<button type="button" class="btn-mover" data-mover' +
+            ' title="Arraste para reordenar, ou use as setas do teclado"' +
+            ' aria-label="Mover documento na ordem de impressão">⠿</button>' +
+          '<span class="folha-num" aria-hidden="true"></span>' +
+        '</td>' +
         '<td>' + esc(m ? m.titulo : s.tipo) + '</td>' +
         '<td class="col-titulo">' + esc(s.titulo || '—') +
           (s.semData ? ' <span class="etiqueta">sem data</span>' : '') + '</td>' +
@@ -70,9 +77,12 @@
         '</td></tr>';
     }).join('');
 
-    alvo.innerHTML = '<table class="tabela"><thead><tr>' +
+    alvo.innerHTML = '<table class="tabela tabela-documentos"><thead><tr>' +
+      '<th class="col-mover"><span title="Em que folha de papel cada um cai">Folha</span></th>' +
       '<th>Documento</th><th>Título</th><th>Gravado</th><th></th>' +
       '</tr></thead><tbody>' + linhas + '</tbody></table>';
+
+    ligarArrasto(alvo.querySelector('tbody'));
 
     Array.prototype.forEach.call(alvo.querySelectorAll('[data-excluir]'), function (b) {
       b.addEventListener('click', function () {
@@ -89,6 +99,114 @@
         var s = D.lerDocumento(b.dataset.gerar);
         if (s) produzir([s], false, true);
       });
+    });
+  }
+
+  // ------------------------------------------------------------ reordenação
+
+  /* A ordem da tabela é a ordem de impressão, e é ela que decide quais meias
+     páginas dividem folha. Por isso o número da folha aparece ao lado da alça
+     e se refaz a cada movimento — sem esse retorno, arrastar seria às cegas.
+
+     Arrastar não funciona com o dedo nem com o teclado, então a mesma alça
+     também anda com as setas quando está em foco. */
+  function ligarArrasto(tbody) {
+    if (!tbody) return;
+    var origem = null;
+
+    function linhas() {
+      return Array.prototype.slice.call(tbody.querySelectorAll('tr'));
+    }
+
+    function gravarOrdem() {
+      D.reordenarDocumentos(linhas().map(function (tr) { return tr.dataset.id; }));
+      atendimento = D.lerAtendimento();
+      atualizarImpressao();
+    }
+
+    Array.prototype.forEach.call(tbody.querySelectorAll('[data-mover]'), function (alca) {
+      var tr = alca.closest('tr');
+
+      // a linha só fica arrastável enquanto a alça estiver pressionada, senão
+      // selecionar o texto da tabela vira um arrasto sem querer
+      function armar() {
+        tr.draggable = true;
+        // clique sem arrasto: desarma, senão a linha fica arrastável para sempre
+        document.addEventListener('mouseup', function () {
+          if (!origem) tr.draggable = false;
+        }, { once: true });
+      }
+      alca.addEventListener('mousedown', armar);
+      alca.addEventListener('touchstart', armar, { passive: true });
+
+      alca.addEventListener('keydown', function (e) {
+        var passo = e.key === 'ArrowUp' ? -1 : (e.key === 'ArrowDown' ? 1 : 0);
+        if (!passo) return;
+        e.preventDefault();
+        var vizinho = passo < 0 ? tr.previousElementSibling : tr.nextElementSibling;
+        if (!vizinho) return;
+        tbody.insertBefore(passo < 0 ? tr : vizinho, passo < 0 ? vizinho : tr);
+        gravarOrdem();
+        alca.focus();
+      });
+    });
+
+    tbody.addEventListener('dragstart', function (e) {
+      var tr = e.target.closest && e.target.closest('tr');
+      if (!tr) return;
+      origem = tr;
+      tr.classList.add('arrastando');
+      if (e.dataTransfer) {
+        e.dataTransfer.effectAllowed = 'move';
+        // o Firefox só inicia o arrasto se houver algum dado no pacote
+        try { e.dataTransfer.setData('text/plain', tr.dataset.id); } catch (x) { /* ok */ }
+      }
+    });
+
+    tbody.addEventListener('dragover', function (e) {
+      if (!origem) return;
+      e.preventDefault();
+      if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+
+      var alvo = e.target.closest && e.target.closest('tr');
+      if (!alvo || alvo === origem) return;
+
+      // passou da metade da linha? entra depois dela
+      var r = alvo.getBoundingClientRect();
+      var depois = (e.clientY - r.top) > r.height / 2;
+      tbody.insertBefore(origem, depois ? alvo.nextSibling : alvo);
+    });
+
+    tbody.addEventListener('drop', function (e) { e.preventDefault(); });
+
+    tbody.addEventListener('dragend', function () {
+      if (!origem) return;
+      origem.classList.remove('arrastando');
+      origem.draggable = false;
+      origem = null;
+      gravarOrdem();
+    });
+  }
+
+  /* Escreve o número da folha em cada linha, sem redesenhar a tabela — assim
+     quem está usando o teclado não perde o foco da alça. */
+  function numerarFolhas() {
+    var tbody = $('#tabela-documentos tbody');
+    if (!tbody) return;
+
+    var trs = Array.prototype.slice.call(tbody.querySelectorAll('tr'));
+    var mods = trs.map(function (tr) {
+      var s = D.lerDocumento(tr.dataset.id);
+      return s ? modulo(s.tipo) : null;
+    });
+    if (mods.some(function (m) { return !m; })) return;
+
+    var folhas = I.folhaDeCada(mods, $('#agrupar').checked);
+    trs.forEach(function (tr, i) {
+      var alvo = tr.querySelector('.folha-num');
+      if (!alvo) return;
+      alvo.textContent = folhas[i] || '';
+      tr.classList.toggle('folha-par', folhas[i] % 2 === 0);
     });
   }
 
@@ -116,6 +234,8 @@
       folhas + (folhas === 1 ? ' folha de papel' : ' folhas de papel');
     if (agrupar && folhas < sem) texto += ' (economia de ' + (sem - folhas) + ')';
     $('#dica-folhas').textContent = texto;
+
+    numerarFolhas();
   }
 
   function produzir(salvos, baixar, individual) {
