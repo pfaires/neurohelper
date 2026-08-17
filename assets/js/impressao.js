@@ -61,8 +61,15 @@ window.Impressao = (function () {
   }
 
   /* Distribui os documentos em folhas, preservando a ordem da tabela.
-     Qualquer documento de meia página cabe na próxima vaga livre, mesmo que o
-     vizinho seja de outro tipo. */
+
+     Documento de meia página **sempre** entra numa folha A4, na metade de cima,
+     girado se for A5 retrato. Nunca sai como página A5 solta: o que existe na
+     bandeja é papel A4, e uma página A5 avulsa sairia centralizada, com margem
+     de todo lado e sem a linha de corte — impossível de destacar direito.
+
+     O que a opção `agrupar` decide é só se dois documentos podem dividir a
+     mesma folha. Desligada, cada um fica com a sua, e a metade de baixo vai em
+     branco. */
   function planejar(feitos, agrupar) {
     var folhas = [];
     var aberta = null;
@@ -70,17 +77,24 @@ window.Impressao = (function () {
     feitos.forEach(function (f) {
       var forma = f.documento.folha || 'a4-retrato';
 
-      if (!agrupar || !meia(forma)) {
+      if (!meia(forma)) {
         folhas.push({ tipo: 'inteira', itens: [f] });
+        /* Uma página inteira no meio fecha a folha que estava aberta. Sem isso
+           a meia página seguinte voltaria para trás, e o papel sairia fora da
+           ordem da tabela — justamente o que quem arrasta as linhas está
+           tentando controlar. Custa uma folha de vez em quando; para juntar as
+           duas metades, basta deixá-las lado a lado na lista. */
+        aberta = null;
         return;
       }
-      if (aberta && aberta.itens.length < MEIA.vagas.length) {
+      if (agrupar && aberta && aberta.itens.length < MEIA.vagas.length) {
         aberta.itens.push(f);
         if (aberta.itens.length === MEIA.vagas.length) aberta = null;
         return;
       }
       aberta = { tipo: 'meia', itens: [f] };
       folhas.push(aberta);
+      if (!agrupar) aberta = null;
     });
 
     return folhas;

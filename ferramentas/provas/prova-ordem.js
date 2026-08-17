@@ -147,14 +147,28 @@ confere('três meias: a terceira abre folha nova',
 confere('página inteira ocupa a folha sozinha',
   I.folhaDeCada([INTEIRA, DEITADA, EM_PE], true), [1, 2, 2]);
 
-/* O caso que motivou a prova: a segunda meia página entra numa folha aberta
-   antes da inteira, então a folha 2 aparece depois da 3 na tabela. Se o mapa
-   fosse montado só percorrendo as folhas em ordem, os números sairiam trocados. */
-confere('meia página volta para a folha aberta lá atrás',
-  I.folhaDeCada([DEITADA, INTEIRA, EM_PE], true), [1, 2, 1]);
+/* Uma inteira no meio fecha a folha aberta: a meia seguinte não volta para
+   trás. Sem isso o papel sairia fora da ordem da tabela. */
+confere('inteira no meio fecha a folha aberta',
+  I.folhaDeCada([DEITADA, INTEIRA, EM_PE], true), [1, 2, 3]);
 
-confere('sem agrupar, cada um na sua folha',
+confere('o número da folha nunca anda para trás',
+  I.folhaDeCada([DEITADA, INTEIRA, EM_PE, EM_PE, INTEIRA, DEITADA], true).every(
+    (n, i, v) => i === 0 || n >= v[i - 1]), true);
+
+console.log('\nmeia página sozinha também sai em meia folha:');
+
+/* O que existe na bandeja é A4. Uma página A5 avulsa sairia centralizada, sem
+   linha de corte, impossível de destacar direito — então mesmo sem agrupar o
+   documento vai para a metade de cima de uma A4. */
+confere('sem agrupar, cada meia fica na sua folha (não vira página A5 solta)',
   I.folhaDeCada([DEITADA, EM_PE, DEITADA], false), [1, 2, 3]);
+
+confere('um documento de meia página sozinho ocupa uma folha',
+  I.contarFolhas([EM_PE], false), 1);
+
+confere('agrupar só decide se duas dividem folha, não o formato do papel',
+  I.contarFolhas([DEITADA, EM_PE], true) < I.contarFolhas([DEITADA, EM_PE], false), true);
 
 confere('contagem bate com o maior número de folha',
   I.contarFolhas([DEITADA, INTEIRA, EM_PE], true),

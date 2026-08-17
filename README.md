@@ -76,11 +76,21 @@ retorno seria às cegas.
 A mesma alça anda com as setas do teclado quando está em foco, já que arrastar
 não funciona nem com o dedo nem sem mouse.
 
-Um detalhe que rendeu prova: uma meia página pode entrar numa folha **aberta
-várias posições atrás**, então a ordem das folhas não acompanha a das linhas.
-Com `[A5, A4, A5]` as folhas saem `1, 2, 1`. Montar o mapa percorrendo as folhas
-em sequência trocaria os números; `Impressao.folhaDeCada` carrega a posição
-original junto e devolve no índice certo.
+## Meia página
+
+Documento de meia página **sempre** sai numa folha A4, na metade de cima, girado
+90° se for A5 retrato — mesmo quando é o único do lote. Nunca como página A5
+avulsa: o que existe na bandeja é A4, e uma A5 solta sairia centralizada, com
+margem de todo lado e sem a linha de corte, impossível de destacar direito.
+
+A opção *agrupar* decide só se **dois** documentos podem dividir a mesma folha.
+Desligada, cada um fica com a sua e a metade de baixo vai em branco.
+
+Uma página inteira no meio da fila fecha a folha de meia página que estava
+aberta. Custa papel de vez em quando, mas sem isso a meia página seguinte
+voltaria para uma folha lá atrás e o papel sairia fora da ordem da tabela — que
+é justamente o que quem arrasta as linhas está tentando controlar. Para juntar
+duas metades, basta deixá-las lado a lado na lista.
 
 ## Documentos
 
