@@ -57,6 +57,7 @@ window.Cabecalho = (function () {
             '<a href="index.html"' + atual('inicio') + '>Início</a>' +
             '<a href="atendimento.html"' + atual('atendimento') + '>Atendimento</a>' +
             '<a href="ambulatorio.html?id=geral"' + atual('ambulatorio') + '>Ambulatórios</a>' +
+            '<a href="escalas.html"' + atual('escalas') + '>Escalas</a>' +
             '<a href="prescritor.html"' + atual('prescritor') + '>Prescritores</a>' +
           '</nav>' +
         '</div>' +

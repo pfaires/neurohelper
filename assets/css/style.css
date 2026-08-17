@@ -693,3 +693,120 @@ code {
 .tabela-documentos tbody tr { cursor: default; }
 
 .alca-exemplo { color: var(--cinza); }
+
+/* ------------------------------------------------- escalas e calculadoras */
+
+.campo-data-escala { max-width: 200px; margin: 18px 0 6px; }
+
+.grupo-escala { margin-bottom: 26px; }
+.grupo-escala .titulo-secao { margin-bottom: 10px; }
+
+.item-escala {
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  background: var(--branco);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+}
+.item-escala h4 {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  margin: 0 0 8px;
+  font-size: .98rem;
+}
+.item-escala .num-item {
+  flex: none;
+  min-width: 22px;
+  padding: 1px 6px;
+  font-size: .72rem;
+  font-weight: 700;
+  text-align: center;
+  color: var(--branco);
+  background: var(--azul);
+  border-radius: 10px;
+}
+.item-escala .dica { margin: -4px 0 8px; }
+
+/* a pergunta que só troca a régua de outro item não é um item pontuado */
+.item-roteiro { background: var(--azul-fundo); border-style: dashed; }
+
+.opcoes-escala { display: flex; flex-direction: column; gap: 3px; }
+
+.opcao-escala {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 6px 8px;
+  font-size: .89rem;
+  line-height: 1.35;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.opcao-escala:hover { background: var(--azul-fundo); }
+.opcao-escala input { margin: 2px 0 0; flex: none; }
+.opcao-escala .ponto-escala {
+  flex: none;
+  min-width: 20px;
+  font-weight: 700;
+  color: var(--cinza);
+  text-align: center;
+}
+.opcao-escala.marcada {
+  background: var(--azul-fundo);
+  border-color: var(--azul-claro);
+}
+.opcao-escala.marcada .ponto-escala { color: var(--azul); }
+.opcao-escala.marcada .texto-escala { font-weight: 600; }
+
+/* placar: acompanha a rolagem, para o total ficar sempre à vista */
+.painel-escala {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 22px;
+  padding: 14px 18px;
+  margin-top: 8px;
+  background: var(--branco);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  box-shadow: 0 -6px 18px rgba(28, 43, 51, .09);
+}
+.painel-escala .placar { display: flex; align-items: baseline; gap: 4px; }
+.painel-escala .placar #pontos { font-size: 2rem; font-weight: 700; color: var(--azul); }
+.painel-escala .placar #maximo { font-size: .95rem; color: var(--cinza); }
+.painel-escala .placar-lado { flex: 1 1 240px; }
+.painel-escala .acoes { margin: 0; }
+
+.progresso { margin: 0 0 4px; font-size: .78rem; color: var(--erro); }
+.progresso.completa { color: var(--cinza); }
+
+.parcial { display: inline-block; margin-right: 14px; font-size: .78rem; color: var(--cinza); }
+.parcial b { margin-right: 4px; color: var(--texto); }
+
+.interpretacao { margin: 6px 0 0; font-size: .82rem; }
+
+.bloco-previa { margin: 14px 0; }
+.bloco-previa summary { font-size: .82rem; color: var(--azul-claro); cursor: pointer; }
+.bloco-previa pre {
+  margin: 8px 0 0;
+  padding: 12px 14px;
+  font-size: .82rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  background: var(--branco);
+  border: 1px solid var(--borda);
+  border-radius: 6px;
+}
+
+.nota {
+  padding: 10px 14px;
+  font-size: .84rem;
+  background: var(--azul-fundo);
+  border-left: 3px solid var(--azul-claro);
+  border-radius: 0 6px 6px 0;
+}
+.referencia { margin-top: 24px; font-size: .74rem; color: var(--cinza); }

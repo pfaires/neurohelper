@@ -92,6 +92,50 @@ voltaria para uma folha lá atrás e o papel sairia fora da ordem da tabela — 
 é justamente o que quem arrasta as linhas está tentando controlar. Para juntar
 duas metades, basta deixá-las lado a lado na lista.
 
+## Escalas e calculadoras
+
+Área à parte, em `escalas.html` e `escala.html?id=`. Não gravam nada e não
+exigem paciente em atendimento: pontuam, mostram o resultado e copiam o texto
+pronto para colar no prontuário.
+
+O registro (`assets/js/escalas.js`) segue o mesmo espírito de `Laudos` — cada
+escala é um arquivo que se declara, e a página genérica desenha qualquer uma.
+O motor cuida da soma, do máximo e de quantos itens faltam, para nenhuma escala
+precisar contar os próprios pontos.
+
+Uma peculiaridade que virou recurso: `opcoes` de um item pode ser **função das
+respostas**. É o que permite um item mudar de régua conforme outra pergunta.
+
+### ALSFRS-R
+
+Doze itens de 0 a 4, total 0 a 48, em quatro domínios de três itens: bulbar,
+motor fino, motor grosso e respiratório. Os subescores aparecem ao lado do
+total, porque 30 pontos com o respiratório zerado é situação muito diferente de
+30 pontos com o respiratório intacto.
+
+O **item 5 tem duas réguas**: cortar alimentos, para quem não tem gastrostomia,
+e manusear fechos e utensílios, para quem tem. A pergunta sobre a sonda vem
+antes e não soma ponto nenhum — só troca a régua. Quando a régua da gastrostomia
+é usada, o texto copiado diz isso, senão o número sairia do prontuário sem o
+contexto que o explica.
+
+O texto copiado:
+
+```
+ALSFRS-R (17/08/2026): 30 pontos
+1. Fala: 3
+2. Salivação: 4
+...
+12. Insuficiência respiratória: 2
+```
+
+Item sem resposta sai como `—`, nunca como zero: escala pela metade não pode
+virar um total que parece verdadeiro.
+
+`node ferramentas/provas/prova-escala.js` cobre a soma, a troca de régua, os
+subescores e o texto. Escala mal somada é pior do que escala nenhuma — o número
+vai para o prontuário e ninguém confere a conta.
+
 ## Documentos
 
 | Documento | Folha | Origem do modelo |

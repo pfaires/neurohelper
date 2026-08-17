@@ -40,4 +40,14 @@
           '<p>' + esc(amb.descricao || '') + '</p></a></li>';
       }).join('')
     : '<li><p class="sub">Nenhum ambulatório cadastrado ainda.</p></li>';
+
+  var caixaEscalas = document.getElementById('lista-escalas-inicio');
+  var escalas = (window.Escalas && window.Escalas.lista) || [];
+  if (caixaEscalas) {
+    caixaEscalas.innerHTML = escalas.map(function (e) {
+      return '<li><a class="cartao" href="escala.html?id=' + encodeURIComponent(e.id) + '">' +
+        '<h3>' + esc(e.sigla) + '</h3>' +
+        '<p>' + esc(e.titulo) + '</p></a></li>';
+    }).join('') || '<li><p class="sub">Nenhuma escala cadastrada ainda.</p></li>';
+  }
 })();

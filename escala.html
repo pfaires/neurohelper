@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Escala · NeuroHelper</title>
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<div id="cabecalho"></div>
+
+<main class="container" id="conteudo">
+  <p class="trilha"><a href="index.html">Início</a> ›
+     <a href="escalas.html">Escalas</a> › <span id="trilha-fim"></span></p>
+  <h2 id="titulo-pagina"></h2>
+  <p class="sub" id="sub-pagina"></p>
+  <p class="sub" id="descricao"></p>
+  <p class="nota" id="observacao" hidden></p>
+
+  <div class="campo campo-data-escala">
+    <label for="data-escala">Data da avaliação</label>
+    <input type="text" id="data-escala" data-mascara="data" inputmode="numeric"
+           maxlength="10" autocomplete="off">
+  </div>
+
+  <div id="itens"></div>
+
+  <div class="painel-escala" id="painel">
+    <div class="placar">
+      <span id="pontos">0</span><span id="maximo">/ 48</span>
+    </div>
+    <div class="placar-lado">
+      <p class="progresso" id="progresso"></p>
+      <div id="resumo"></div>
+      <p class="interpretacao" id="interpretacao" hidden></p>
+    </div>
+    <div class="acoes">
+      <button type="button" class="btn-primario" id="btn-copiar">Copiar para o prontuário</button>
+      <button type="button" class="btn-secundario" id="btn-limpar">Limpar</button>
+    </div>
+  </div>
+
+  <p class="aviso" id="aviso"></p>
+
+  <details class="bloco-previa">
+    <summary>Ver o texto que será copiado</summary>
+    <pre id="previa"></pre>
+  </details>
+
+  <p class="referencia" id="referencia" hidden></p>
+</main>
+
+<div id="rodape"></div>
+
+<script src="assets/js/pdf-comum.js"></script>
+<script src="assets/js/markdown.js"></script>
+<script src="assets/js/editor-markdown.js"></script>
+<script src="assets/js/campos.js"></script>
+<script src="assets/js/armazenamento.js"></script>
+<script src="assets/js/cabecalho.js"></script>
+<script src="assets/js/escalas.js"></script>
+<script src="assets/js/escala-alsfrs-r.js"></script>
+<script src="assets/js/pag-escala.js"></script>
+</body>
+</html>

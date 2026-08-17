@@ -7,6 +7,7 @@ node ferramentas/provas/prova.js             markdown desenhado no PDF
 node ferramentas/provas/prova-impressao.js   agrupamento em meia folha
 node ferramentas/provas/prova-editor.js      ida e volta do modo visual
 node ferramentas/provas/prova-ordem.js       reordenação e mapa de folhas
+node ferramentas/provas/prova-escala.js      soma e texto das escalas
 ```
 
 As duas primeiras usam um **pdf-lib de mentira**: em vez de gerar arquivo,
