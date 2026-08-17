@@ -102,7 +102,7 @@ duas metades, basta deixá-las lado a lado na lista.
 | Receituário simples | A5 retrato | redesenhado |
 | Receituário de controle especial | A4 paisagem, duas vias | redesenhado |
 | LME — solicitação de medicamentos | A4 retrato | oficial do SUS, dois modelos |
-| Outros documentos | A5 retrato | redesenhado |
+| Outros documentos | A5 ou A4 retrato, à escolha | redesenhado |
 | FAA — ficha de atendimento ambulatorial | A5 paisagem | redesenhado, fiel ao impresso |
 
 Campos preenchidos em cada um:
@@ -130,6 +130,18 @@ Campos preenchidos em cada um:
     embaixo da coluna do carimbo;
   - não há moldura em volta da folha, nem rodapé.
 - **Outros documentos** — folha livre para atestado, declaração, relatório, encaminhamento. Título impresso (opcional, sai em maiúsculas), teor e assinatura. A opção *imprimir nome e registro do prescritor* pode ser desmarcada por quem prefere só carimbar: sai apenas a linha, com a legenda embaixo.
+
+  Sai em **meia página (A5)** ou **página inteira (A4)**, escolhido no formulário.
+  O A5 divide folha com outro documento e serve para atestado e declaração; o A4
+  existe porque relatório e contrarreferência não cabem em meia página, e deixar
+  o corpo da letra encolher até caber produz um documento ruim de ler. Trocar o
+  formato não mexe no texto — os dois modelos têm os mesmos campos.
+
+  Para isso, `modelo` e `folha` do documento podem ser **função dos dados**, não
+  só texto fixo. `Impressao.folhaDe` resolve os dois casos, e por tabela
+  `contarFolhas` e `folhaDeCada` passaram a receber `{ documento, dados }` — a
+  contagem de folhas da tela do atendimento precisa saber o formato escolhido em
+  cada documento gravado, não só o tipo dele.
 
 - **LME** — 1 e 2 (fixos), 3.1, 3.2, 4 a 6, 7 e 8 (até seis medicamentos com as quantidades dos seis meses), 9 a 16, 18 a 22. As assinaturas (17 e 23) ficam em branco.
 

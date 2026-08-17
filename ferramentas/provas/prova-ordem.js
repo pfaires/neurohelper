@@ -174,5 +174,36 @@ confere('contagem bate com o maior número de folha',
   I.contarFolhas([DEITADA, INTEIRA, EM_PE], true),
   Math.max.apply(null, I.folhaDeCada([DEITADA, INTEIRA, EM_PE], true)));
 
+// ------------------------------------------- formato escolhido no documento
+
+/* "Outros documentos" sai em A5 ou A4 conforme o campo preenchido, então a
+   folha não pode ser um texto fixo no módulo. */
+const CAMALEAO = { folha: d => (d.formato === 'a4' ? 'a4-retrato' : 'a5-retrato') };
+
+console.log('\nformato que depende do preenchido:');
+
+confere('em A5 divide folha com outra meia página',
+  I.folhaDeCada([{ documento: CAMALEAO, dados: { formato: 'a5' } },
+                 { documento: DEITADA, dados: {} }], true), [1, 1]);
+
+confere('em A4 ocupa a folha sozinho',
+  I.folhaDeCada([{ documento: CAMALEAO, dados: { formato: 'a4' } },
+                 { documento: DEITADA, dados: {} }], true), [1, 2]);
+
+confere('o mesmo documento em dois formatos gasta folhas diferentes',
+  [I.contarFolhas([{ documento: CAMALEAO, dados: { formato: 'a5' } },
+                   { documento: DEITADA, dados: {} }], true),
+   I.contarFolhas([{ documento: CAMALEAO, dados: { formato: 'a4' } },
+                   { documento: DEITADA, dados: {} }], true)], [1, 2]);
+
+confere('sem dados, cai no formato padrão do próprio documento',
+  I.folhaDe(CAMALEAO, null), 'a5-retrato');
+
+confere('documento sem folha declarada vale como página inteira',
+  I.folhaDe({}, {}), 'a4-retrato');
+
+confere('lista de módulos crus continua funcionando',
+  I.folhaDeCada([DEITADA, EM_PE], true), [1, 1]);
+
 console.log(falhou ? '\n' + falhou + ' prova(s) falharam' : '\ntodas as provas passaram');
 process.exit(falhou ? 1 : 0);

@@ -34,6 +34,26 @@ window.Impressao = (function () {
 
   function meia(folha) { return FORMATOS_MEIOS.indexOf(folha) >= 0; }
 
+  /* O formato costuma ser fixo, mas o documento pode escolher conforme o
+     preenchido — "outros documentos" sai em meia página ou em página inteira,
+     e quem emite decide na hora. */
+  function folhaDe(documento, dados) {
+    if (!documento) return 'a4-retrato';
+    var f = typeof documento.folha === 'function'
+      ? documento.folha(dados || {})
+      : documento.folha;
+    return f || 'a4-retrato';
+  }
+
+  /* Aceita tanto o módulo do documento quanto { documento, dados }, para as
+     chamadas antigas continuarem valendo. */
+  function comDados(lista) {
+    return (lista || []).map(function (x, i) {
+      var ehPar = x && x.documento;
+      return { documento: ehPar ? x.documento : x, dados: (ehPar && x.dados) || {}, pos: i };
+    });
+  }
+
   /* Preenche todos os documentos, em sequência para não disputar memória.
 
      O flush() no fim não é enfeite. As fontes que o pdf-lib "embarca" só entram
@@ -50,7 +70,7 @@ window.Impressao = (function () {
         return L.preencher(item.documento, item.dados).then(function (r) {
           cortou = cortou || r.cortou;
           return Promise.resolve(r.doc.flush()).then(function () {
-            acc.push({ documento: item.documento, doc: r.doc });
+            acc.push({ documento: item.documento, dados: item.dados, doc: r.doc });
             return acc;
           });
         });
@@ -75,7 +95,7 @@ window.Impressao = (function () {
     var aberta = null;
 
     feitos.forEach(function (f) {
-      var forma = f.documento.folha || 'a4-retrato';
+      var forma = folhaDe(f.documento, f.dados);
 
       if (!meia(forma)) {
         folhas.push({ tipo: 'inteira', itens: [f] });
@@ -125,7 +145,7 @@ window.Impressao = (function () {
             return q.then(function () {
               return final.embedPage(item.doc.getPages()[0]).then(function (emb) {
                 var vaga = MEIA.vagas[i];
-                var girar = item.documento.folha === 'a5-retrato';
+                var girar = folhaDe(item.documento, item.dados) === 'a5-retrato';
 
                 // largura e altura que a página ocupa depois de posicionada
                 var ocupaL = girar ? emb.height : emb.width;
@@ -192,8 +212,7 @@ window.Impressao = (function () {
 
   /* Quantas folhas de papel sairiam, para mostrar antes de imprimir. */
   function contarFolhas(documentos, agrupar) {
-    var falsos = documentos.map(function (d) { return { documento: d }; });
-    return planejar(falsos, agrupar !== false).length;
+    return planejar(comDados(documentos), agrupar !== false).length;
   }
 
   /* Em que folha cai cada documento, na ordem em que foram passados. É o que
@@ -203,9 +222,8 @@ window.Impressao = (function () {
      entrar numa folha aberta lá atrás —, por isso a posição vai junto e volta
      no índice certo. */
   function folhaDeCada(documentos, agrupar) {
-    var falsos = documentos.map(function (d, i) { return { documento: d, pos: i }; });
-    var mapa = new Array(documentos.length);
-    planejar(falsos, agrupar !== false).forEach(function (folha, k) {
+    var mapa = new Array((documentos || []).length);
+    planejar(comDados(documentos), agrupar !== false).forEach(function (folha, k) {
       folha.itens.forEach(function (item) { mapa[item.pos] = k + 1; });
     });
     return mapa;
@@ -248,6 +266,7 @@ window.Impressao = (function () {
     gerar: gerar,
     contarFolhas: contarFolhas,
     folhaDeCada: folhaDeCada,
+    folhaDe: folhaDe,
     meia: meia,
     dadosDe: dadosDe,
     itensDe: itensDe

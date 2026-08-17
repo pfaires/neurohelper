@@ -4,24 +4,41 @@
    relatório, encaminhamento. Um título opcional, um campo de teor (com
    markdown) e o espaço de assinatura.
 
-   Modelo em branco gerado por ferramentas/gerar-modelos.py (A5 retrato, 420 x 595). */
+   Sai em dois tamanhos, à escolha de quem emite. O A5 é meia página e divide
+   folha com outro documento — bom para atestado e declaração. O A4 existe
+   porque relatório e contrarreferência não cabem em meia página, e deixar o
+   corpo da letra encolher até caber produz um documento ruim de ler.
+
+   Trocar o formato não mexe no texto: os dois modelos têm os mesmos campos, só
+   muda onde eles caem no papel.
+
+   Modelos em branco gerados por ferramentas/gerar-modelos.py. */
 
 (function () {
   'use strict';
 
   var C = {
-    nome:       { x: 92.1, y: 523.0, w: 307.9 },
-    data:       { x: 44.1, y: 496.0, w: 166.9 },
-    prontuario: { x: 263.1, y: 496.0, w: 136.9 }
-  };
+    a5: {
+      nome:       { x: 92.1, y: 523.0, w: 307.9 },
+      data:       { x: 44.1, y: 496.0, w: 161.9 },
+      prontuario: { x: 258.1, y: 496.0, w: 141.9 },
+      titulo:     { x: 210.0, y: 462, w: 364 },
+      teor:           [24.0, 176.0, 396.0, 470],
+      teorComTitulo:  [24.0, 176.0, 396.0, 450],
+      assinaturaNome:     { x: 210.0, y: 139, w: 216 },
+      assinaturaRegistro: { x: 210.0, y: 129, w: 236 }
+    },
 
-  var TITULO = { x: 210.0, y: 462.0, w: 364.0 };
-  var TEOR = [24.0, 176.0, 396.0, 470.0];
-  var TEOR_COM_TITULO = [24.0, 176.0, 396.0, 450.0];
-
-  var ASSINATURA = {
-    nome:     { cx: 210.0, y: 139.0, w: 240.0 },
-    registro: { cx: 210.0, y: 129.0, w: 260.0 }
+    a4: {
+      nome:       { x: 116.1, y: 770.0, w: 434.9 },
+      data:       { x: 68.1, y: 743.0, w: 225.4 },
+      prontuario: { x: 345.6, y: 743.0, w: 205.4 },
+      titulo:     { x: 297.5, y: 709, w: 491 },
+      teor:           [48.0, 198.0, 547.0, 717],
+      teorComTitulo:  [48.0, 198.0, 547.0, 697],
+      assinaturaNome:     { x: 297.5, y: 161, w: 236 },
+      assinaturaRegistro: { x: 297.5, y: 151, w: 256 }
+    }
   };
 
   var SUGESTOES = [
@@ -43,9 +60,16 @@
     id: 'outros-documentos',
     titulo: 'Outros documentos',
     descricao: 'Folha livre para atestado, declaração, relatório ou orientações. ' +
-               'Meia página (A5 retrato).',
-    modelo: 'assets/pdf/outros-documentos.pdf',
-    folha: 'a5-retrato',
+               'Meia página ou página inteira, à escolha.',
+    /* Modelo e formato de folha seguem o campo, em vez de serem fixos. */
+    modelo: function (d) {
+      return d.formato === 'a4'
+        ? 'assets/pdf/outros-documentos-a4.pdf'
+        : 'assets/pdf/outros-documentos.pdf';
+    },
+    folha: function (d) {
+      return d.formato === 'a4' ? 'a4-retrato' : 'a5-retrato';
+    },
     tituloPadrao: function (d) {
       if (d.assunto) return String(d.assunto).trim();
       var primeira = String(d.teor || '').split('\n')[0].replace(/^#+\s*/, '').trim();
@@ -53,6 +77,12 @@
     },
 
     campos: [
+      { id: 'formato', rotulo: 'Tamanho da folha', tipo: 'radio', larg: 4,
+        opcoes: [{ valor: 'a5', texto: 'Meia página (A5)', padrao: true },
+                 { valor: 'a4', texto: 'Página inteira (A4)' }],
+        dica: 'A meia página divide folha com outro documento. A inteira cabe ' +
+              'muito mais texto, sem encolher a letra.' },
+
       { id: 'assunto', rotulo: 'Título impresso', tipo: 'lista', larg: 8, max: 60,
         opcoes: SUGESTOES,
         dica: 'Aparece em maiúsculas no alto da folha. Em branco, o teor começa mais acima.' },
@@ -62,30 +92,34 @@
         dica: 'Desmarcado, sai só a linha de assinatura — para quem prefere carimbar.' },
 
       { id: 'teor', rotulo: 'Teor', tipo: 'area', larg: 12,
-        max: 4000, linhas: 12, obrigatorio: true,
+        max: 8000, linhas: 12, obrigatorio: true,
         dica: 'Use os botões acima ou escreva markdown direto. ' +
               'As quebras de linha são mantidas no PDF.' }
     ],
 
     preencher: function (p, d) {
-      p.emPonto(d.nome, C.nome);
-      p.emPonto(d.dataSolicitacao, C.data);
-      p.emPonto(d.prontuario, C.prontuario);
+      var c = d.formato === 'a4' ? C.a4 : C.a5;
+
+      p.emPonto(d.nome, c.nome);
+      p.emPonto(d.dataSolicitacao, c.data);
+      p.emPonto(d.prontuario, c.prontuario);
 
       var assunto = String(d.assunto || '').trim();
-      if (assunto) p.txtC(assunto.toUpperCase(), TITULO.x, TITULO.y, 12, true, TITULO.w);
+      if (assunto) {
+        p.txtC(assunto.toUpperCase(), c.titulo.x, c.titulo.y, 12, true, c.titulo.w);
+      }
 
-      var cortou = p.bloco(d.teor, assunto ? TEOR_COM_TITULO : TEOR,
+      var cortou = p.bloco(d.teor, assunto ? c.teorComTitulo : c.teor,
                            { negrito: false, tam: 11 });
 
       if (d.mostrarPrescritor) {
-        p.txtC(d.profissional, ASSINATURA.nome.cx, ASSINATURA.nome.y, 9.5, true,
-               ASSINATURA.nome.w);
-        p.txtC(registroDe(d), ASSINATURA.registro.cx, ASSINATURA.registro.y, 8, false,
-               ASSINATURA.registro.w);
+        p.txtC(d.profissional, c.assinaturaNome.x, c.assinaturaNome.y, 9.5, true,
+               c.assinaturaNome.w);
+        p.txtC(registroDe(d), c.assinaturaRegistro.x, c.assinaturaRegistro.y, 8, false,
+               c.assinaturaRegistro.w);
       } else {
-        p.txtC('Assinatura e carimbo do prescritor', ASSINATURA.nome.cx,
-               ASSINATURA.nome.y, 7.5, false, ASSINATURA.nome.w);
+        p.txtC('Assinatura e carimbo do prescritor', c.assinaturaNome.x,
+               c.assinaturaNome.y, 7.5, false, c.assinaturaNome.w);
       }
 
       return cortou;

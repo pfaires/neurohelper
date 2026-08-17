@@ -213,9 +213,9 @@
     var trs = Array.prototype.slice.call(tbody.querySelectorAll('tr'));
     var mods = trs.map(function (tr) {
       var s = D.lerDocumento(tr.dataset.id);
-      return s ? modulo(s.tipo) : null;
+      return s ? { documento: modulo(s.tipo), dados: s.dados } : null;
     });
-    if (mods.some(function (m) { return !m; })) return;
+    if (mods.some(function (m) { return !m || !m.documento; })) return;
 
     var folhas = I.folhaDeCada(mods, $('#agrupar').checked);
     trs.forEach(function (tr, i) {
@@ -241,8 +241,9 @@
     bloco.hidden = !n;
     if (!n) return;
 
-    var mods = atendimento.documentos.map(function (s) { return modulo(s.tipo); })
-      .filter(function (m) { return !!m; });
+    var mods = atendimento.documentos
+      .map(function (s) { return { documento: modulo(s.tipo), dados: s.dados }; })
+      .filter(function (x) { return !!x.documento; });
     var agrupar = $('#agrupar').checked;
     var folhas = I.contarFolhas(mods, agrupar);
     var sem = I.contarFolhas(mods, false);

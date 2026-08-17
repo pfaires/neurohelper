@@ -11,6 +11,7 @@ Saída:
   assets/pdf/receituario-simples.pdf            A5 retrato   (420 x 595)
   assets/pdf/receituario-controle-especial.pdf  A4 paisagem  (842 x 595), duas vias
   assets/pdf/outros-documentos.pdf              A5 retrato   (420 x 595)
+  assets/pdf/outros-documentos-a4.pdf           A4 retrato   (595 x 842)
   assets/pdf/faa.pdf                            A5 paisagem  (595 x 420)
 
   ferramentas/coordenadas.json   pontos de preenchimento, para os módulos JS
@@ -369,40 +370,68 @@ def controle_especial(destino):
 
 # ------------------------------------------------------- outros documentos
 
-def outros_documentos(destino):
-    """Folha livre em A5: identificação do paciente, um campo de teor e espaço
-    de assinatura. Serve para atestado, declaração, relatório — o que não tem
-    formulário próprio."""
+def outros_documentos(destino, pagina=(420, 595)):
+    """Folha livre: identificação do paciente, um campo de teor e a assinatura.
+    Serve para atestado, declaração, relatório — o que não tem formulário próprio.
+
+    Sai em dois tamanhos. O A5 é o de sempre, para o bilhete curto que divide
+    folha com outro documento; o A4 existe porque relatório e contrarreferência
+    não cabem em meia página, e espremer o corpo da letra até caber deixa o
+    documento ruim de ler.
+
+    O que muda entre os dois é só a margem e a altura da área de teor: cabeçalho,
+    linha de assinatura e rodapé institucional têm tamanho absoluto, senão o A4
+    sairia com um cabeçalho desproporcional."""
     campos = {}
-    c = canvas.Canvas(destino, pagesize=(420, 595))
+    L, A = pagina
+    c = canvas.Canvas(destino, pagesize=pagina)
     f = Folha(c, campos)
-    E, D = 16, 404
 
-    f.cabecalho(E, 540, D, 578, 'DOCUMENTO')
+    E = 16 if L < 500 else 40
+    D = L - E
+    cx = (E + D) / 2
 
-    f.celula('nome', 'Nome do paciente:', E, 512, D, 540)
-    f.celula('data', 'Data:', E, 486, 215, 512)
-    f.celula('prontuario', 'Prontuário:', 215, 486, D, 512)
+    # faixa de cima: alturas absolutas, iguais nos dois tamanhos
+    topo = A - 17
+    f.cabecalho(E, topo - 38, D, topo, 'DOCUMENTO')
+
+    y_nome = topo - 38
+    f.celula('nome', 'Nome do paciente:', E, y_nome - 28, D, y_nome)
+
+    y_dados = y_nome - 28
+    f.celula('data', 'Data:', E, y_dados - 26, cx, y_dados)
+    f.celula('prontuario', 'Prontuário:', cx, y_dados - 26, D, y_dados)
 
     # corpo: teor em cima, assinatura embaixo
-    f.ret(E, 108, D, 480)
-    campos['titulo'] = {'x': (E + D) / 2, 'y': 462.0, 'w': D - E - 24}
-    campos['teor'] = [24.0, 176.0, 396.0, 470.0]
-    campos['teorComTitulo'] = [24.0, 176.0, 396.0, 450.0]
+    corpo_topo = y_dados - 26 - 6
+    corpo_base = 108 if L < 500 else 130
+    f.ret(E, corpo_base, D, corpo_topo)
 
-    f.linha(122, 150, 298, 150, 0.7)
-    campos['assinaturaNome'] = {'x': (E + D) / 2, 'y': 139.0, 'w': 240.0}
-    campos['assinaturaRegistro'] = {'x': (E + D) / 2, 'y': 129.0, 'w': 260.0}
+    campos['titulo'] = {'x': cx, 'y': round(corpo_topo - 18, 1), 'w': D - E - 24}
 
-    cx = (E + D) / 2
-    f.txtc(CNPJ, cx, 92, 7.5, negrito=True)
-    f.txtc(ENDERECO, cx, 83, 6.5)
-    f.txtc(TELEFONE, cx, 74, 6.5)
-    f.rodape('Hospital Universitário Lauro Wanderley – UFPB', cx, 58)
+    teor_esq, teor_dir = E + 8, D - 8
+    teor_base = corpo_base + 68
+    campos['teor'] = [float(teor_esq), float(teor_base), float(teor_dir),
+                      round(corpo_topo - 10, 1)]
+    campos['teorComTitulo'] = [float(teor_esq), float(teor_base), float(teor_dir),
+                               round(corpo_topo - 30, 1)]
+
+    y_linha = corpo_base + 42
+    meia_linha = 88 if L < 500 else 98
+    f.linha(cx - meia_linha, y_linha, cx + meia_linha, y_linha, 0.7)
+    campos['assinaturaNome'] = {'x': cx, 'y': round(y_linha - 11, 1), 'w': 2 * meia_linha + 40}
+    campos['assinaturaRegistro'] = {'x': cx, 'y': round(y_linha - 21, 1), 'w': 2 * meia_linha + 60}
+
+    # rodapé institucional, fora da caixa
+    y_cnpj = corpo_base - 16
+    f.txtc(CNPJ, cx, y_cnpj, 7.5, negrito=True)
+    f.txtc(ENDERECO, cx, y_cnpj - 9, 6.5)
+    f.txtc(TELEFONE, cx, y_cnpj - 18, 6.5)
+    f.rodape('Hospital Universitário Lauro Wanderley – UFPB', cx, y_cnpj - 34)
 
     c.showPage()
     c.save()
-    return {'pagina': [420, 595], 'campos': campos}
+    return {'pagina': list(pagina), 'campos': campos}
 
 
 # ------------------------------------------------------------------------ FAA
@@ -546,6 +575,8 @@ def main():
         'receituario-controle-especial': controle_especial(
             os.path.join(PDF, 'receituario-controle-especial.pdf')),
         'outros-documentos': outros_documentos(os.path.join(PDF, 'outros-documentos.pdf')),
+        'outros-documentos-a4': outros_documentos(
+            os.path.join(PDF, 'outros-documentos-a4.pdf'), (595, 842)),
         'faa': faa(os.path.join(PDF, 'faa.pdf')),
     }
     destino = os.path.join(RAIZ, 'ferramentas', 'coordenadas.json')
