@@ -11,6 +11,7 @@ Saída:
   assets/pdf/receituario-simples.pdf            A5 retrato   (420 x 595)
   assets/pdf/receituario-controle-especial.pdf  A4 paisagem  (842 x 595), duas vias
   assets/pdf/outros-documentos.pdf              A5 retrato   (420 x 595)
+  assets/pdf/faa.pdf                            A5 paisagem  (595 x 420)
 
   ferramentas/coordenadas.json   pontos de preenchimento, para os módulos JS
 
@@ -404,6 +405,86 @@ def outros_documentos(destino):
     return {'pagina': [420, 595], 'campos': campos}
 
 
+# ------------------------------------------------------------------------ FAA
+
+OBSERVACOES_FAA = [
+    ('1- ', 'CARO PACIENTE, A MARCAÇÃO DE SUA CONSULTA SÓ SERÁ POSSÍVEL MEDIANTE '
+            'APRESENTAÇÃO DESTE DOCUMENTO.'),
+    ('2- ', 'NÃO SENDO RETORNO OBRIGATÓRIO, APÓS A TERCEIRA CONSULTA, A MESMA DEVERÁ '
+            'SER NOVAMENTE AUTORIZADA PELA SECRETARIA MUNICIPAL DE SAÚDE DE JOÃO PESSOA '
+            'ATRAVÉS DA SUA CENTRAL DE MARCAÇÃO DE CONSULTA COM O FORMULÁRIO ESPECÍFICO '
+            '(FICHA DE ENCAMINHAMENTO-REFERÊNCIA).')
+]
+
+
+def faa(destino):
+    """Ficha de Atendimento Ambulatorial — retorno.
+
+    A grade de datas e o carimbo saem em branco de propósito: quem preenche é o
+    balcão da marcação, com a ficha na mão."""
+    campos = {}
+    c = canvas.Canvas(destino, pagesize=(595, 420))
+    f = Folha(c, campos)
+    E, D = 16, 579
+    MEIO = 428          # divisa entre a coluna dos dados e a do carimbo
+
+    f.cabecalho(E, 352, D, 406, 'FICHA DE ATENDIMENTO AMBULATORIAL', 'RETORNO')
+
+    f.celula('nome', 'NOME DO USUÁRIO:', E, 328, MEIO, 350)
+    f.celula('data', 'DATA:', MEIO, 328, D, 350)
+
+    f.celula('prontuario', 'PRONTUÁRIO HULW:', E, 304, MEIO, 326)
+
+    # carimbo: uma caixa só, alta, do lado direito
+    f.ret(MEIO, 130, D, 326)
+    f.txtc('CARIMBO E ASSINATURA', (MEIO + D) / 2, 314, 7, negrito=True)
+    f.txtc('DO MÉDICO (A)', (MEIO + D) / 2, 305, 7, negrito=True)
+
+    f.area('patologia', 'DESCRIÇÃO DA PATOLOGIA', E, 250, MEIO, 302)
+    f.celula('especialidade', 'ESPECIALIDADE MÉDICA:', E, 226, MEIO, 248)
+
+    # grade de retorno: três consultas, preenchidas à mão no balcão
+    f.ret(E, 130, MEIO, 224)
+    f.txt('TIPO DE ENCAMINHAMENTO', E + 5, 212, 8, negrito=True)
+
+    linhas_y = [(184, 206), (158, 180), (132, 154)]
+    for i, (y0, y1) in enumerate(linhas_y):
+        ultima = i == len(linhas_y) - 1
+        rotulos = ['DIA:', 'MÊS:', 'HORA:', 'GRADE:'] + (['ALTA:'] if ultima else [])
+        larg = (MEIO - 10 - E) / len(rotulos)
+        for k, r in enumerate(rotulos):
+            x0 = E + 5 + k * larg
+            f.celula(None, r, x0, y0, x0 + larg - 3, y1, tam_rotulo=7)
+
+    # observações: texto fixo, quebrado na largura da folha
+    f.ret(E, 58, D, 126)
+    f.txt('OBSERVAÇÕES:', E + 5, 114, 8, negrito=True)
+
+    y = 103
+    for marca, texto in OBSERVACOES_FAA:
+        recuo = E + 5
+        primeira = True
+        linha = marca
+        for palavra in texto.split():
+            teste = (linha + ' ' + palavra).strip() if linha != marca else marca + palavra
+            if f.larg(teste, 6.8) > D - E - 14:
+                f.txt(linha, recuo if primeira else recuo + f.larg(marca, 6.8), y, 6.8)
+                if primeira:
+                    primeira = False
+                linha = palavra
+                y -= 9
+            else:
+                linha = teste
+        f.txt(linha, recuo if primeira else recuo + f.larg(marca, 6.8), y, 6.8)
+        y -= 11
+
+    f.rodape('FAA · Hospital Universitário Lauro Wanderley – UFPB', (E + D) / 2, 44)
+
+    c.showPage()
+    c.save()
+    return {'pagina': [595, 420], 'campos': campos}
+
+
 # ------------------------------------------------------------------------ main
 
 def main():
@@ -414,6 +495,7 @@ def main():
         'receituario-controle-especial': controle_especial(
             os.path.join(PDF, 'receituario-controle-especial.pdf')),
         'outros-documentos': outros_documentos(os.path.join(PDF, 'outros-documentos.pdf')),
+        'faa': faa(os.path.join(PDF, 'faa.pdf')),
     }
     destino = os.path.join(RAIZ, 'ferramentas', 'coordenadas.json')
     with open(destino, 'w', encoding='utf-8') as fp:

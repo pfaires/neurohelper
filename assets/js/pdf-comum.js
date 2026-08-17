@@ -400,10 +400,19 @@ window.Laudos = (function () {
     return cache[caminho];
   }
 
+  /* Qual PDF em branco usar. Normalmente é um caminho fixo, mas o documento
+     pode devolver um caminho conforme o preenchido — o LME, por exemplo, tem
+     dois modelos oficiais em circulação e quem emite escolhe. */
+  function modeloDe(documento, dados) {
+    return typeof documento.modelo === 'function'
+      ? documento.modelo(dados || {})
+      : documento.modelo;
+  }
+
   /* Preenche um documento e devolve { doc, cortou }. */
   function preencher(documento, dados) {
     return garantirPdfLib()
-      .then(function () { return bytesDe(documento.modelo); })
+      .then(function () { return bytesDe(modeloDe(documento, dados)); })
       .then(function (b) { return window.PDFLib.PDFDocument.load(b); })
       .then(function (doc) {
         var StandardFonts = window.PDFLib.StandardFonts;

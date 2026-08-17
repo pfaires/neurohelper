@@ -91,8 +91,9 @@ original junto e devolve no índice certo.
 | Requisição de exames (LAC-001) | A5 paisagem | redesenhado |
 | Receituário simples | A5 retrato | redesenhado |
 | Receituário de controle especial | A4 paisagem, duas vias | redesenhado |
-| LME — solicitação de medicamentos | A4 retrato | oficial do SUS |
+| LME — solicitação de medicamentos | A4 retrato | oficial do SUS, dois modelos |
 | Outros documentos | A5 retrato | redesenhado |
+| FAA — ficha de atendimento ambulatorial | A5 paisagem | redesenhado |
 
 Campos preenchidos em cada um:
 
@@ -101,11 +102,38 @@ Campos preenchidos em cada um:
 - **Requisição de exames** — nome, prontuário, idade (calculada), sexo, cartão social, enfermaria, leito, dados clínicos, urgência, justificativa, material e exames.
 - **Receituário simples** — nome, data, prontuário e prescrição.
 - **Receituário de controle especial** — paciente (com CPF entre parênteses, se informado), endereço, prescrição e data, iguais nas duas vias.
+- **FAA** — nome, prontuário, data, descrição da patologia e especialidade. A grade de dia/mês/hora/grade e o carimbo saem em branco: quem preenche é o balcão da marcação, com a ficha na mão.
 - **Outros documentos** — folha livre para atestado, declaração, relatório, encaminhamento. Título impresso (opcional, sai em maiúsculas), teor e assinatura. A opção *imprimir nome e registro do prescritor* pode ser desmarcada por quem prefere só carimbar: sai apenas a linha, com a legenda embaixo.
 
 - **LME** — 1 e 2 (fixos), 3.1, 3.2, 4 a 6, 7 e 8 (até seis medicamentos com as quantidades dos seis meses), 9 a 16, 18 a 22. As assinaturas (17 e 23) ficam em branco.
 
-É o modelo oficial **simplificado**, sem as grades de caractere da versão anterior: CNES, CNS, CPF e telefone são campos de texto corrido. Traz também o nome social do paciente (campo 3.2), que na versão antiga não existia.
+### Os dois modelos de LME
+
+Circulam dois formulários oficiais, e o campo *Modelo do formulário* escolhe:
+
+- **Simplificado** (padrão) — sem as grades de caractere: CNES, CNS, CPF e telefone
+  são texto corrido. Traz o nome social do paciente (campo 3.2), que o outro não tem.
+- **Oficial completo** — o do cabeçalho do SUS, que algumas farmácias exigem.
+
+O completo é aquele cuja geometria de desenho é imprestável (matrizes aninhadas
+que não fecham) e que por isso ficou de fora na primeira tentativa. A saída veio
+de outro lugar: a **versão eletrônica** publicada pelo Ministério traz 85 campos
+AcroForm, com os retângulos exatos de cada campo — a fonte de coordenadas mais
+confiável que existe para esse PDF.
+
+`ferramentas/preparar-lme-oficial.py` lê essa versão, guarda os retângulos em
+`assets/js/coord-lme-oficial.js` e **arranca** widgets e AcroForm, deixando um PDF
+chapado em `assets/pdf/lme-oficial.pdf`. O site desenha por cima, com o mesmo
+pincel dos outros documentos.
+
+Entregar o AcroForm preenchido teria sido mais curto, mas errado: a barra de
+botões do topo ("Salvar como", "Limpar todos os campos") sairia impressa, os
+campos continuariam editáveis na mão de quem recebe, e as fontes declaradas nos
+campos não estão embutidas.
+
+A ordem das opções de marcação (raça, quem preencheu, CPF/CNS) veio dos valores
+de exportação `/0`../4` de cada quadradinho, conferida contra os rótulos extraídos
+ao redor — não da posição no papel, que em raça/cor não segue a ordem de leitura.
 
 > **Ao mapear coordenadas por extração**, lembre que bibliotecas como o pdfplumber
 > informam o rodapé da caixa da fonte, não a linha de base: ela fica `0,207 × corpo`

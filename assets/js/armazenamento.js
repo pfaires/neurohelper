@@ -198,6 +198,48 @@ window.Dados = (function () {
     gravarAtendimento(a);
   }
 
+  /* Copia um documento e põe a cópia logo abaixo do original — não no fim da
+     lista, porque a ordem é a de impressão e o par costuma andar junto.
+     Serve para a segunda receita, o exame do outro lado, a FAA de outra
+     especialidade: quase tudo igual, um campo diferente. */
+  function duplicarDocumento(id) {
+    var a = lerAtendimento();
+    if (!a) return null;
+
+    var i = -1;
+    for (var k = 0; k < a.documentos.length; k++) {
+      if (a.documentos[k].id === id) { i = k; break; }
+    }
+    if (i < 0) return null;
+
+    var agora = new Date().toISOString();
+    var copia = JSON.parse(JSON.stringify(a.documentos[i]));
+    copia.id = uid();
+    copia.criadoEm = agora;
+    copia.gravadoEm = agora;
+    copia.titulo = proximoTitulo(a.documentos, copia.titulo);
+
+    a.documentos.splice(i + 1, 0, copia);
+    gravarAtendimento(a);
+    return copia;
+  }
+
+  /* "Receita" → "Receita (2)" → "Receita (3)". Sem isso a tabela fica com duas
+     linhas idênticas e não dá para saber qual é qual. */
+  function proximoTitulo(documentos, titulo) {
+    var base = String(titulo || '').replace(/\s*\((\d+)\)\s*$/, '');
+    var usados = {};
+    documentos.forEach(function (d) {
+      var t = String(d.titulo || '');
+      if (t === base) { usados[1] = true; return; }
+      var m = t.match(/^(.*?)\s*\((\d+)\)$/);
+      if (m && m[1] === base) usados[+m[2]] = true;
+    });
+    var n = 2;
+    while (usados[n]) n++;
+    return (base + ' (' + n + ')').slice(0, 60);
+  }
+
   /* Reordena pela lista de ids. A ordem não é enfeite: ela decide a sequência
      de impressão e quais documentos de meia página dividem a mesma folha.
      Qualquer id desconhecido é ignorado, e o que a lista não citar vai para o
@@ -253,6 +295,7 @@ window.Dados = (function () {
     lerDocumento: lerDocumento,
     salvarDocumento: salvarDocumento,
     excluirDocumento: excluirDocumento,
+    duplicarDocumento: duplicarDocumento,
     reordenarDocumentos: reordenarDocumentos,
     acrescentarDocumentos: acrescentarDocumentos
   };

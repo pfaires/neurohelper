@@ -1,10 +1,14 @@
 /* LME — Laudo de solicitação, avaliação e autorização de medicamento(s).
    Componente Especializado da Assistência Farmacêutica. A4 retrato.
 
-   Usa o modelo oficial simplificado: caixas retangulares comuns, sem grades de
-   caractere. Diferente da versão anterior do formulário, a geometria vetorial
-   deste PDF é coerente, então as coordenadas saem direto da extração
-   (`x0/y0/x1/y1` dos retângulos, com origem no canto inferior esquerdo). */
+   Dois modelos oficiais circulam, e quem emite escolhe:
+
+     simplificado  caixas retangulares comuns, sem grades de caractere, e com
+                   nome social. Geometria vetorial coerente: as coordenadas
+                   abaixo saem direto da extração (x0/y0/x1/y1, origem no canto
+                   inferior esquerdo).
+     oficial       o completo, com cabeçalho do SUS. Coordenadas em
+                   assets/js/coord-lme-oficial.js — veja preencherOficial(). */
 
 (function () {
   'use strict';
@@ -73,6 +77,98 @@
   var MESES = ['m1', 'm2', 'm3', 'm4', 'm5', 'm6'];
   var LISTA = 'assets/dados/medicamentos-lme.json';
 
+  // ------------------------------------------------------- modelo oficial
+
+  /* O outro LME em circulação: o modelo completo, com o cabeçalho do SUS e as
+     caixas arredondadas. A geometria de desenho dele é imprestável — matrizes
+     aninhadas que não fecham —, mas a versão eletrônica publicada pelo
+     Ministério traz campos de formulário com os retângulos exatos, e é de lá
+     que vêm as coordenadas em assets/js/coord-lme-oficial.js.
+
+     Preenchemos por cima do PDF achatado, com o mesmo pincel dos outros
+     documentos: nada de formulário editável na mão de quem recebe. */
+
+  function oficial() { return window.CoordLmeOficial || null; }
+
+  /* Linha de base para o texto sentar no meio do retângulo do campo. */
+  function baseNa(cx, tam) {
+    return cx[1] + (cx[3] - cx[1] - tam * 0.717) / 2 + 0.5;
+  }
+
+  function escreverEm(p, texto, cx, tam) {
+    if (!cx || !texto) return;
+    p.txtLim(texto, cx[0] + 3, baseNa(cx, tam), tam, cx[2] - cx[0] - 6, true);
+  }
+
+  function centrarEm(p, texto, cx, tam) {
+    if (!cx || !texto) return;
+    p.txtC(texto, (cx[0] + cx[2]) / 2, baseNa(cx, tam), tam, true, cx[2] - cx[0] - 4);
+  }
+
+  /* X centrado no quadradinho, medido pelo próprio retângulo. */
+  function marcarEm(p, cx, tam) {
+    if (!cx) return;
+    p.marcar([(cx[0] + cx[2]) / 2, baseNa(cx, tam)], tam);
+  }
+
+  function preencherOficial(p, d, api) {
+    var C = oficial();
+    if (!C) throw new Error('As coordenadas do modelo oficial não foram carregadas.');
+    var c = C.campos;
+
+    escreverEm(p, api.cnes, c.cnes, 9.5);
+    escreverEm(p, api.estabelecimento, c.estabelecimento, 8.5);
+
+    escreverEm(p, d.nome, c.nome, 9.5);
+    escreverEm(p, d.mae, c.mae, 9.5);
+    centrarEm(p, api.digitos(d.peso), c.peso, 9.5);
+    centrarEm(p, api.digitos(d.altura), c.altura, 9.5);
+
+    (d.medicamentos || []).slice(0, C.medicamentos.length).forEach(function (item, i) {
+      var linha = C.medicamentos[i];
+      escreverEm(p, item.nome, linha.nome, 8);
+      MESES.forEach(function (mes, k) {
+        centrarEm(p, String(item[mes] || '').trim(), linha.meses[k], 9);
+      });
+    });
+
+    centrarEm(p, String(d.cid || '').toUpperCase(), c.cid, 9.5);
+    escreverEm(p, d.diagnostico, c.diagnostico, 9);
+
+    var cortou = p.bloco(d.anamnese, [c.anamnese[0] + 3, c.anamnese[1] + 3,
+                                      c.anamnese[2] - 3, c.anamnese[3] - 3],
+                         { negrito: false, tam: 9 });
+
+    marcarEm(p, C.marcacoes.tratamentoPrevio[d.tratamentoPrevio === 'sim' ? 'sim' : 'nao'], 8.5);
+    escreverEm(p, d.tratamentoRelato, c.tratamentoRelato, 9);
+
+    marcarEm(p, C.marcacoes.incapaz[d.incapaz === 'sim' ? 'sim' : 'nao'], 8.5);
+    escreverEm(p, d.responsavel, c.responsavel, 9);
+
+    escreverEm(p, d.profissional, c.profissional, 9.5);
+    escreverEm(p, d.numeroDoc, c.documentoMedico, 9.5);
+    centrarEm(p, d.dataSolicitacao, c.data, 9.5);
+
+    marcarEm(p, C.marcacoes.preenchidoPor[d.preenchidoPor], 8.5);
+    marcarEm(p, C.marcacoes.raca[d.raca], 8.5);
+    if (d.raca === 'indigena') escreverEm(p, d.etnia, c.etnia, 9);
+
+    var tel = api.digitos(d.telefone);
+    if (tel.length > 2) escreverEm(p, window.Laudos.mascaras.telefone(tel), c.telefone1, 9.5);
+
+    var cpf = api.digitos(d.cpf);
+    if (cpf.length === 11) {
+      marcarEm(p, C.marcacoes.tipoDocPaciente.cpf, 8.5);
+      escreverEm(p, window.Laudos.mascaras.cpf(cpf), c.documentoPaciente, 9.5);
+    } else if (api.digitos(d.cns).length === 15) {
+      marcarEm(p, C.marcacoes.tipoDocPaciente.cns, 8.5);
+      escreverEm(p, d.cns, c.documentoPaciente, 9.5);
+    }
+
+    escreverEm(p, d.email, c.email, 9);
+    return cortou;
+  }
+
   function colunaMes(i) {
     return { id: MESES[i], rotulo: (i + 1) + 'º mês', mascara: 'numero', max: 4,
              modo: 'numeric', largura: '52px' };
@@ -81,8 +177,10 @@
   window.Laudos.registrar({
     id: 'lme',
     titulo: 'LME — solicitação de medicamentos',
-    descricao: 'Laudo de solicitação, avaliação e autorização de medicamento(s) do Componente Especializado da Assistência Farmacêutica. Página A4.',
-    modelo: 'assets/pdf/lme.pdf',
+    descricao: 'Laudo de solicitação, avaliação e autorização de medicamento(s) do Componente Especializado da Assistência Farmacêutica. Dois modelos à escolha. Página A4.',
+    modelo: function (d) {
+      return d.modelo === 'oficial' ? 'assets/pdf/lme-oficial.pdf' : 'assets/pdf/lme.pdf';
+    },
     folha: 'a4-retrato',
     tituloPadrao: function (d) {
       var m = (d.medicamentos || [])[0];
@@ -90,6 +188,12 @@
     },
 
     campos: [
+      { id: 'modelo', rotulo: 'Modelo do formulário', tipo: 'radio', larg: 6,
+        opcoes: [{ valor: 'simplificado', texto: 'Simplificado', padrao: true },
+                 { valor: 'oficial', texto: 'Oficial completo' }],
+        dica: 'Os dois circulam. O simplificado é mais limpo e tem nome social; ' +
+              'o oficial é o do cabeçalho do SUS, que algumas farmácias exigem.' },
+
       { id: 'medicamentos', rotulo: 'Medicamentos e quantidade por mês',
         tipo: 'linhas', larg: 12, max: 6, obrigatorio: true,
         rotuloAcrescentar: 'Acrescentar medicamento',
@@ -102,7 +206,8 @@
         ] },
 
       { id: 'nomeSocial', rotulo: 'Nome social <span class="opcional">(opcional)</span>',
-        tipo: 'texto', larg: 6, max: 70 },
+        tipo: 'texto', larg: 6, max: 70,
+        dica: 'Só existe no modelo simplificado — o oficial não tem esse campo.' },
       { id: 'peso', rotulo: 'Peso (kg)', tipo: 'texto', mascara: 'numero', max: 3,
         modo: 'numeric', larg: 2 },
       { id: 'altura', rotulo: 'Altura (cm)', tipo: 'texto', mascara: 'numero', max: 3,
@@ -143,6 +248,8 @@
     ],
 
     preencher: function (p, d, api) {
+      if (d.modelo === 'oficial') return preencherOficial(p, d, api);
+
       // estabelecimento (fixo)
       p.emCaixa(api.cnes, CX.f1);
       p.emCaixa(api.estabelecimento, CX.f2, 9);

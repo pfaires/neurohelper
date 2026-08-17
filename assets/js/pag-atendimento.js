@@ -73,6 +73,8 @@
           '<a class="btn-mini" href="formulario.html?doc=' + encodeURIComponent(s.tipo) +
             '&id=' + encodeURIComponent(s.id) + '">Editar</a>' +
           '<button type="button" class="btn-mini" data-gerar="' + s.id + '">Gerar</button>' +
+          '<button type="button" class="btn-mini" data-duplicar="' + s.id + '"' +
+            ' title="Cria uma cópia logo abaixo, com os mesmos dados">Duplicar</button>' +
           '<button type="button" class="btn-mini btn-perigo-mini" data-excluir="' + s.id + '">Excluir</button>' +
         '</td></tr>';
     }).join('');
@@ -98,6 +100,20 @@
       b.addEventListener('click', function () {
         var s = D.lerDocumento(b.dataset.gerar);
         if (s) produzir([s], false, true);
+      });
+    });
+
+    Array.prototype.forEach.call(alvo.querySelectorAll('[data-duplicar]'), function (b) {
+      b.addEventListener('click', function () {
+        var copia = D.duplicarDocumento(b.dataset.duplicar);
+        if (!copia) return;
+        atendimento = D.lerAtendimento();
+        desenharTabela();
+        atualizarImpressao();
+
+        // a cópia é o motivo do clique: leva direto para a edição dela
+        location.href = 'formulario.html?doc=' + encodeURIComponent(copia.tipo) +
+          '&id=' + encodeURIComponent(copia.id);
       });
     });
   }

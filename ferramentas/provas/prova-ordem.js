@@ -94,6 +94,42 @@ confere('lista ausente não quebra', titulos(), ['A', 'C', 'D', 'B']);
 
 confere('nenhum documento se perdeu', D.lerAtendimento().documentos.length, 4);
 
+// -------------------------------------------------------------- duplicação
+
+console.log('\nduplicação:');
+
+D.iniciarAtendimento({ nome: 'Fulana de Tal' });
+D.acrescentarDocumentos([
+  { tipo: 'receita', titulo: 'Receita', semData: true, dados: { corpo: 'Dipirona' } },
+  { tipo: 'exame', titulo: 'Exames', dados: { itens: ['HMG'] } }
+]);
+
+const [rec, exa] = ids();
+const copia = D.duplicarDocumento(rec);
+
+confere('a cópia entra logo abaixo do original, não no fim',
+  titulos(), ['Receita', 'Receita (2)', 'Exames']);
+confere('a cópia leva os dados', D.lerDocumento(copia.id).dados, { corpo: 'Dipirona' });
+confere('a cópia leva o "sem data"', D.lerDocumento(copia.id).semData, true);
+confere('a cópia tem id próprio', copia.id !== rec, true);
+
+/* Editar a cópia não pode respingar no original: se o clone fosse raso, os dois
+   apontariam para o mesmo objeto e mexer num mudaria o outro. */
+D.salvarDocumento(Object.assign({}, D.lerDocumento(copia.id), { dados: { corpo: 'Losartana' } }));
+confere('editar a cópia não mexe no original',
+  D.lerDocumento(rec).dados, { corpo: 'Dipirona' });
+
+D.duplicarDocumento(rec);
+confere('a numeração pula o que já existe',
+  titulos(), ['Receita', 'Receita (3)', 'Receita (2)', 'Exames']);
+
+D.duplicarDocumento(copia.id);
+confere('duplicar uma cópia volta à base do nome',
+  titulos(), ['Receita', 'Receita (3)', 'Receita (2)', 'Receita (4)', 'Exames']);
+
+confere('duplicar id inexistente não faz nada', D.duplicarDocumento('fantasma'), null);
+confere('nada se perdeu', D.lerAtendimento().documentos.length, 5);
+
 // --------------------------------------------------- em que folha cada um cai
 
 const INTEIRA = { folha: 'a4-retrato' };
