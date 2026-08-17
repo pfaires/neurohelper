@@ -60,9 +60,9 @@
       { id: 'diagnostico', rotulo: 'Descrição do diagnóstico',
         tipo: 'texto', larg: 8, max: 60, obrigatorio: true },
       { id: 'cidPrincipal', rotulo: 'CID 10 principal',
-        tipo: 'texto', mascara: 'cid', larg: 2, exemplo: 'G35' },
+        tipo: 'texto', mascara: 'cid', max: 6, larg: 2, exemplo: 'G12.2' },
       { id: 'cidSecundario', rotulo: 'CID 10 secundário',
-        tipo: 'texto', mascara: 'cid', larg: 2 },
+        tipo: 'texto', mascara: 'cid', max: 6, larg: 2 },
       { id: 'observacoes', rotulo: 'Observações',
         tipo: 'area', larg: 12, max: 1400, linhas: 7,
         dica: 'O campo do formulário comporta cerca de 7 linhas; textos longos são reduzidos automaticamente.' }

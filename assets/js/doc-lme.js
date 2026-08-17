@@ -212,8 +212,8 @@
         modo: 'numeric', larg: 2 },
       { id: 'altura', rotulo: 'Altura (cm)', tipo: 'texto', mascara: 'numero', max: 3,
         modo: 'numeric', larg: 2 },
-      { id: 'cid', rotulo: 'CID-10', tipo: 'texto', mascara: 'cid', max: 4,
-        larg: 2, exemplo: 'G35', obrigatorio: true },
+      { id: 'cid', rotulo: 'CID-10', tipo: 'texto', mascara: 'cid', max: 6,
+        larg: 2, exemplo: 'G12.2', obrigatorio: true },
       { id: 'diagnostico', rotulo: 'Diagnóstico', tipo: 'texto', larg: 12, max: 90 },
 
       { id: 'anamnese', rotulo: 'Anamnese', tipo: 'area', larg: 12, max: 1200,

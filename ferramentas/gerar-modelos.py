@@ -450,11 +450,14 @@ def faa(destino):
     linhas_y = [(184, 206), (158, 180), (132, 154)]
     for i, (y0, y1) in enumerate(linhas_y):
         ultima = i == len(linhas_y) - 1
-        rotulos = ['DIA:', 'MÊS:', 'HORA:', 'GRADE:'] + (['ALTA:'] if ultima else [])
-        larg = (MEIO - 10 - E) / len(rotulos)
-        for k, r in enumerate(rotulos):
+        colunas = [('dia', 'DIA:'), ('mes', 'MÊS:'), ('hora', 'HORA:'), ('grade', 'GRADE:')]
+        if ultima:
+            colunas.append(('alta', 'ALTA:'))
+        larg = (MEIO - 10 - E) / len(colunas)
+        for k, (chave, rotulo) in enumerate(colunas):
             x0 = E + 5 + k * larg
-            f.celula(None, r, x0, y0, x0 + larg - 3, y1, tam_rotulo=7)
+            f.celula('r%d%s' % (i + 1, chave), rotulo,
+                     x0, y0, x0 + larg - 3, y1, tam_rotulo=7)
 
     # observações: texto fixo, quebrado na largura da folha
     f.ret(E, 58, D, 126)

@@ -112,7 +112,7 @@ Campos preenchidos em cada um:
 - **Requisição de exames** — nome, prontuário, idade (calculada), sexo, cartão social, enfermaria, leito, dados clínicos, urgência, justificativa, material e exames.
 - **Receituário simples** — nome, data, prontuário e prescrição.
 - **Receituário de controle especial** — paciente (com CPF entre parênteses, se informado), endereço, prescrição e data, iguais nas duas vias.
-- **FAA** — nome, prontuário, data, descrição da patologia e especialidade. A grade de dia/mês/hora/grade e o carimbo saem em branco: quem preenche é o balcão da marcação, com a ficha na mão.
+- **FAA** — nome, prontuário, data, descrição da patologia, especialidade e as três linhas de retorno (dia, mês, hora, grade, e alta na terceira). Os campos de retorno são texto livre, e ficam em branco se não forem preenchidos — quem completa é o balcão da marcação. O carimbo é sempre à mão.
 - **Outros documentos** — folha livre para atestado, declaração, relatório, encaminhamento. Título impresso (opcional, sai em maiúsculas), teor e assinatura. A opção *imprimir nome e registro do prescritor* pode ser desmarcada por quem prefere só carimbar: sai apenas a linha, com a legenda embaixo.
 
 - **LME** — 1 e 2 (fixos), 3.1, 3.2, 4 a 6, 7 e 8 (até seis medicamentos com as quantidades dos seis meses), 9 a 16, 18 a 22. As assinaturas (17 e 23) ficam em branco.

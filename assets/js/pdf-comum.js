@@ -87,7 +87,13 @@ window.Laudos = (function () {
       return '(' + ddd + ') ' + n.slice(0, corte) + '-' + n.slice(corte);
     },
     uf: function (v) { return (v || '').replace(/[^a-zA-Z]/g, '').toUpperCase().slice(0, 2); },
-    cid: function (v) { return (v || '').replace(/[^a-zA-Z0-9.]/g, '').toUpperCase().slice(0, 6); },
+    /* CID-10 tem subcategoria: G35, mas também G12.2. O ponto entra sozinho
+       depois do terceiro caractere, como nas outras máscaras — quem digita
+       "G122" vê "G12.2", e quem para em "G35" não ganha ponto nenhum. */
+    cid: function (v) {
+      var s = (v || '').replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 5);
+      return s.length > 3 ? s.slice(0, 3) + '.' + s.slice(3) : s;
+    },
     inteiro: function (v) { return digitos(v).slice(0, 3); },
     // só dígitos, sem limite próprio: quem limita é o maxlength do campo
     numero: function (v) { return digitos(v); }
