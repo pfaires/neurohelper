@@ -114,11 +114,21 @@ Campos preenchidos em cada um:
 - **Receituário de controle especial** — paciente (com CPF entre parênteses, se informado), endereço, prescrição e data, iguais nas duas vias.
 - **FAA** — nome, prontuário, data, descrição da patologia, especialidade e as três linhas de retorno (dia, mês, hora, grade, e alta na terceira). Os campos de retorno são texto livre, e ficam em branco se não forem preenchidos — quem completa é o balcão da marcação. O carimbo é sempre à mão.
 
-  O desenho da FAA segue o impresso do hospital de perto — rótulos fora das caixas
-  numa coluna à esquerda, caixas soltas em vez de grade fechada, sem moldura em
-  volta da folha e observações sem caixa. Não é capricho: quem recebe a ficha no
-  balcão reconhece o papel pelo formato, e um layout "melhorado" corre o risco de
-  não ser aceito.
+  O desenho da FAA foi **medido** sobre `ferramentas/origem/faa-digitalizada.pdf`,
+  não estimado: as réguas do escaneamento foram detectadas por varredura,
+  corrigida a inclinação de 0,8°, e convertidas a 0,20593 pt por pixel. Não é
+  capricho — quem recebe a ficha no balcão reconhece o papel pelo formato, e um
+  layout "melhorado" corre o risco de não ser aceito.
+
+  O impresso tem particularidades que ficam como estão:
+
+  - o rótulo fica **acima** da caixa, menos em `PRONTUÁRIO HULW`, que fica ao lado;
+  - `CARIMBO E ASSINATURA` fica **dentro** da própria caixa, no alto;
+  - a base do carimbo alinha com a base de `ESPECIALIDADE MÉDICA`;
+  - as caixas da grade têm larguras diferentes entre si — `DIA` e `MÊS` curtas,
+    `HORA` e `GRADE` largas — e `ALTA` só existe na terceira linha, à direita,
+    embaixo da coluna do carimbo;
+  - não há moldura em volta da folha, nem rodapé.
 - **Outros documentos** — folha livre para atestado, declaração, relatório, encaminhamento. Título impresso (opcional, sai em maiúsculas), teor e assinatura. A opção *imprimir nome e registro do prescritor* pode ser desmarcada por quem prefere só carimbar: sai apenas a linha, com a legenda embaixo.
 
 - **LME** — 1 e 2 (fixos), 3.1, 3.2, 4 a 6, 7 e 8 (até seis medicamentos com as quantidades dos seis meses), 9 a 16, 18 a 22. As assinaturas (17 e 23) ficam em branco.

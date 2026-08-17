@@ -420,106 +420,116 @@ OBSERVACOES_FAA = [
 def faa(destino):
     """Ficha de Atendimento Ambulatorial — retorno.
 
-    Copiado do impresso do hospital, e a fidelidade aqui é requisito, não
-    capricho: quem recebe a ficha no balcão reconhece o papel pelo desenho. Por
-    isso os rótulos ficam FORA das caixas, numa coluna à esquerda, as caixas são
-    retângulos soltos (não uma grade fechada), não há moldura em volta da folha
-    e as observações saem sem caixa nenhuma — tudo como no original."""
+    Medida sobre uma digitalização do impresso, não estimada: as réguas do
+    escaneamento foram detectadas por varredura, corrigida a inclinação de 0,8°,
+    e convertidas com 0,20593 pt por pixel. A fidelidade é requisito — quem
+    recebe a ficha no balcão reconhece o papel pelo desenho, e um layout
+    "arrumado" corre o risco de não ser aceito.
+
+    O que o original tem de peculiar, e que fica como está:
+
+      * o rótulo fica ACIMA da caixa, menos em PRONTUÁRIO HULW, que fica ao lado;
+      * CARIMBO E ASSINATURA fica DENTRO da própria caixa, no alto;
+      * a base do carimbo alinha com a base de ESPECIALIDADE MÉDICA;
+      * as caixas da grade têm larguras diferentes entre si (DIA e MÊS curtas,
+        HORA e GRADE largas), e ALTA só existe na terceira linha, lá na direita,
+        embaixo da coluna do carimbo;
+      * não há moldura em volta da folha, nem rodapé."""
     campos = {}
     c = canvas.Canvas(destino, pagesize=(595, 420))
     f = Folha(c, campos)
-    E, D = 18, 577
-    VALOR = 152          # onde começa a coluna das caixas
-    FIM_ESQ = 430        # onde ela termina, à esquerda do carimbo
-    DIR = 442            # coluna da direita: data e carimbo
 
-    ROT = 7.5
+    ROT = 8.8          # corpo dos rótulos, medido no impresso
+    BASE_ROT = 3.0     # quanto o rótulo sobe acima da caixa
 
-    def rotulo(texto, y):
-        f.txt(texto, E + 2, y, ROT)
+    def acima(texto, x, y_caixa_topo, tam=ROT):
+        f.txt(texto, x, y_caixa_topo + BASE_ROT, tam, negrito=True)
+
+    def valor(chave, cx, tam=10):
+        """Ponto de escrita dentro de uma caixa [x0, y0, x1, y1]."""
+        base = cx[1] + (cx[3] - cx[1] - tam * 0.717) / 2 + 0.5
+        campos[chave] = {'x': round(cx[0] + 4, 1), 'y': round(base, 1),
+                         'w': round(cx[2] - cx[0] - 8, 1)}
 
     # ------------------------------------------------------------- cabeçalho
-    f.ret(E, 348, 128, 404)
-    f.img('hulw.png', E + 4, 352, 120 - E, 48)
+    f.ret(27.5, 343.2, 127.4, 393.0)
+    f.img('hulw.png', 31, 346, 93, 44)
 
-    f.ret(132, 348, 452, 404)
-    f.txtc('FICHA DE ATENDIMENTO AMBULATORIAL', 292, 380, 13, negrito=True)
-    f.txtc('RETORNO', 292, 362, 11.5, negrito=True)
+    f.ret(140.4, 343.2, 457.3, 392.8)
+    f.txtc('FICHA DE ATENDIMENTO AMBULATORIAL', 298.8, 372.5, 14, negrito=True)
+    f.txtc('RETORNO', 298.8, 354.5, 12.4, negrito=True)
 
-    f.img('hubrasil.png', 458, 358, D - 458, 38)
+    f.ret(473.4, 344.2, 572.2, 393.5)
+    f.img('hubrasil.png', 477, 350, 92, 38)
 
     # ------------------------------------------------------- dados de topo
-    rotulo('NOME DO USUÁRIO', 328)
-    f.ret(VALOR, 318, FIM_ESQ, 342)
-    campos['nome'] = {'x': VALOR + 5, 'y': 326.0, 'w': FIM_ESQ - VALOR - 10}
+    NOME = [16.0, 309.9, 370.0, 328.8]
+    acima('NOME DO USUÁRIO', NOME[0], NOME[3])
+    f.ret(*NOME)
+    valor('nome', NOME)
 
-    f.txt('DATA', DIR, 328, ROT)
-    f.ret(DIR + 30, 318, D, 342)
-    campos['data'] = {'x': DIR + 35, 'y': 326.0, 'w': D - DIR - 40}
+    DATA = [468.8, 312.3, 573.4, 328.8]
+    acima('DATA', DATA[0], DATA[3])
+    f.ret(*DATA)
+    valor('data', DATA)
 
-    rotulo('PRONTUÁRIO HULW', 296)
-    f.ret(VALOR, 286, FIM_ESQ, 310)
-    campos['prontuario'] = {'x': VALOR + 5, 'y': 294.0, 'w': FIM_ESQ - VALOR - 10}
+    # o único rótulo do impresso que fica ao lado, e não acima
+    PRONT = [106.6, 286.8, 330.0, 306.0]
+    f.txt('PRONTUÁRIO HULW', 16.0, 292.4, ROT, negrito=True)
+    f.ret(*PRONT)
+    valor('prontuario', PRONT)
 
-    # carimbo: rótulo solto e uma caixa alta embaixo, como no impresso
-    f.txtc('CARIMBO E ASSINATURA DO MÉDICO (A)', (DIR + D) / 2, 296, 6.5)
-    f.ret(DIR, 96, D, 288)
+    # carimbo: rótulo dentro da caixa, e a base alinhada com especialidade
+    BASE_COMUM = 165.5
+    f.ret(342.2, BASE_COMUM, 579.0, 304.1)
+    f.txt('CARIMBO E ASSINATURA DO MÉDICO (A)', 354.6, 290.1, 8.1, negrito=True)
 
     # --------------------------------------------------------------- corpo
-    rotulo('DESCRIÇÃO DA PATOLOGIA', 268)
-    f.ret(VALOR, 212, FIM_ESQ, 278)
-    campos['patologia'] = [VALOR + 5.0, 216.0, FIM_ESQ - 5.0, 272.0]
+    PATOL = [18.5, 213.8, 336.4, 259.1]
+    acima('DESCRIÇÃO DA PATOLOGIA', PATOL[0], PATOL[3], 8.5)
+    f.ret(*PATOL)
+    campos['patologia'] = [PATOL[0] + 4, PATOL[1] + 4, PATOL[2] - 4, PATOL[3] - 4]
 
-    rotulo('ESPECIALIDADE MÉDICA', 194)
-    f.ret(VALOR, 176, FIM_ESQ, 204)
-    campos['especialidade'] = {'x': VALOR + 5, 'y': 186.0, 'w': FIM_ESQ - VALOR - 10}
+    ESP = [19.3, BASE_COMUM, 334.2, 190.6]
+    acima('ESPECIALIDADE MÉDICA', ESP[0], ESP[3], 9.0)
+    f.ret(*ESP)
+    valor('especialidade', ESP)
 
     # ------------------------------------------------- grade de retorno
-    rotulo('TIPO DE ENCAMINHAMENTO', 158)
-    linhas_y = [(140, 164), (110, 134), (80, 104)]
-    for i, (y0, y1) in enumerate(linhas_y):
-        ultima = i == len(linhas_y) - 1
-        colunas = [('dia', 'DIA:'), ('mes', 'MÊS:'), ('hora', 'HORA:'), ('grade', 'GRADE:')]
-        if ultima:
-            colunas.append(('alta', 'ALTA:'))
-        direita = 438 if ultima else FIM_ESQ
+    f.txt('TIPO DE ENCAMINHAMENTO', 16.0, 147.2, 8.7, negrito=True)
 
-        # o espaço que sobra depois dos rótulos é dividido igualmente entre as
-        # caixas — com passo fixo, a coluna de rótulo mais longo comeria a sua
-        rotulos_w = sum(f.larg(r, 7) for _, r in colunas)
-        vao = 3.0          # entre rótulo e caixa
-        entre = 7.0        # entre uma coluna e a próxima
-        livre = direita - VALOR - rotulos_w - vao * len(colunas) - entre * (len(colunas) - 1)
-        cxw = livre / len(colunas)
+    # larguras diferentes por coluna, como no impresso
+    COLUNAS = [('dia', 'DIA:', 126.6, 162.6), ('mes', 'MÊS:', 197.0, 232.4),
+               ('hora', 'HORA:', 277.9, 350.8), ('grade', 'GRADE:', 396.9, 476.6)]
+    ALTA = ('alta', 'ALTA:', 522.3, 577.3)
+    LINHAS = [(126.4, 143.7), (98.4, 115.9), (68.6, 87.5)]
 
-        base = y0 + (y1 - y0 - 8) / 2 + 1
-        x = VALOR
-        for chave, rot in colunas:
-            f.txt(rot, x, base, 7)
-            cx0 = x + f.larg(rot, 7) + vao
-            f.ret(cx0, y0, cx0 + cxw, y1)
-            campos['r%d%s' % (i + 1, chave)] = {
-                'x': round(cx0 + 3, 1), 'y': round(base, 1), 'w': round(cxw - 6, 1)}
-            x = cx0 + cxw + entre
+    for i, (y0, y1) in enumerate(LINHAS):
+        colunas = COLUNAS + ([ALTA] if i == len(LINHAS) - 1 else [])
+        base_rot = y0 + (y1 - y0 - 9.1 * 0.717) / 2 + 0.5
+        for chave, rot, x0, x1 in colunas:
+            f.txt(rot, x0 - f.larg(rot, 9.1, True) - 4, base_rot, 9.1, negrito=True)
+            f.ret(x0, y0, x1, y1)
+            valor('r%d%s' % (i + 1, chave), [x0, y0, x1, y1], 9)
 
     # ---------------------------------------------------------- observações
-    f.txt('OBSERVAÇÕES:', E, 66, 8, negrito=True)
+    f.txt('OBSERVAÇÕES:', 76.3, 57.7, 7.6, negrito=True)
 
-    y = 55
+    y = 47.0
     for marca, texto in OBSERVACOES_FAA:
         primeira = True
         linha = marca
         for palavra in texto.split():
             teste = (linha + ' ' + palavra) if linha != marca else marca + palavra
-            if f.larg(teste, 6.5) > D - E - 4:
-                f.txt(linha, E if primeira else E + f.larg(marca, 6.5), y, 6.5)
+            if f.larg(teste, 6.8, True) > 519:
+                f.txt(linha, 60 if primeira else 60 + f.larg(marca, 6.8, True), y, 6.8, negrito=True)
                 primeira = False
                 linha = palavra
-                y -= 8.5
+                y -= 9
             else:
                 linha = teste
-        f.txt(linha, E if primeira else E + f.larg(marca, 6.5), y, 6.5)
-        y -= 10
+        f.txt(linha, 60 if primeira else 60 + f.larg(marca, 6.8, True), y, 6.8, negrito=True)
+        y -= 10.5
 
     c.showPage()
     c.save()

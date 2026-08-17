@@ -1,9 +1,9 @@
 /* FAA — Ficha de Atendimento Ambulatorial (retorno), HULW/UFPB.
    Modelo em branco gerado por ferramentas/gerar-modelos.py (A5 paisagem, 595 x 420).
 
-   O desenho copia o impresso do hospital de perto — rótulos fora das caixas,
-   caixas soltas, sem moldura em volta —, porque quem recebe a ficha no balcão
-   reconhece o papel pelo formato. Ver faa() em ferramentas/gerar-modelos.py.
+   O desenho foi medido sobre uma digitalização do impresso, não estimado — quem
+   recebe a ficha no balcão reconhece o papel pelo formato. Ver faa() em
+   ferramentas/gerar-modelos.py.
 
    A grade de retorno é texto livre e pode sair em branco, para o balcão
    preencher à mão. O carimbo é sempre manual. */
@@ -12,24 +12,25 @@
   'use strict';
 
   var C = {
-    nome:          { x: 157, y: 326.0, w: 268 },
-    data:          { x: 477, y: 326.0, w: 95 },
-    prontuario:    { x: 157, y: 294.0, w: 268 },
-    especialidade: { x: 157, y: 186.0, w: 268 }
+    nome:          { x: 20.0, y: 316.3, w: 346.0 },
+    data:          { x: 472.8, y: 317.5, w: 96.6 },
+    prontuario:    { x: 110.6, y: 293.3, w: 215.4 },
+    especialidade: { x: 23.3, y: 175.0, w: 306.9 }
   };
 
-  var PATOLOGIA = [157.0, 216.0, 425.0, 272.0];
+  var PATOLOGIA = [22.5, 217.8, 332.4, 255.1];
 
-  /* Grade de retorno: três consultas. Tudo texto livre — "15", "quinze",
-     "3ª feira", "manhã" — porque é assim que é preenchido à mão no balcão. */
+  /* Grade de retorno: três consultas, texto livre — "15", "quinze", "manhã" —
+     porque é assim que o balcão preenche à mão. As colunas têm larguras
+     diferentes, como no impresso, e ALTA só existe na terceira linha. */
   var RETORNO = [
-    { dia: { x: 171.6, y: 149.0, w: 35.3 }, mes: { x: 240.0, y: 149.0, w: 35.3 },
-      hora: { x: 313.5, y: 149.0, w: 35.3 }, grade: { x: 391.7, y: 149.0, w: 35.3 } },
-    { dia: { x: 171.6, y: 119.0, w: 35.3 }, mes: { x: 240.0, y: 119.0, w: 35.3 },
-      hora: { x: 313.5, y: 119.0, w: 35.3 }, grade: { x: 391.7, y: 119.0, w: 35.3 } },
-    { dia: { x: 171.6, y: 89.0, w: 22.8 }, mes: { x: 227.5, y: 89.0, w: 22.8 },
-      hora: { x: 288.4, y: 89.0, w: 22.8 }, grade: { x: 354.0, y: 89.0, w: 22.8 },
-      alta: { x: 412.2, y: 89.0, w: 22.8 } }
+    { dia: { x: 130.6, y: 132.3, w: 28.0 }, mes: { x: 201.0, y: 132.3, w: 27.4 },
+      hora: { x: 281.9, y: 132.3, w: 64.9 }, grade: { x: 400.9, y: 132.3, w: 71.7 } },
+    { dia: { x: 130.6, y: 104.4, w: 28.0 }, mes: { x: 201.0, y: 104.4, w: 27.4 },
+      hora: { x: 281.9, y: 104.4, w: 64.9 }, grade: { x: 400.9, y: 104.4, w: 71.7 } },
+    { dia: { x: 130.6, y: 75.3, w: 28.0 }, mes: { x: 201.0, y: 75.3, w: 27.4 },
+      hora: { x: 281.9, y: 75.3, w: 64.9 }, grade: { x: 400.9, y: 75.3, w: 71.7 },
+      alta: { x: 526.3, y: 75.3, w: 47.0 } }
   ];
 
   var COLUNAS = ['dia', 'mes', 'hora', 'grade'];
