@@ -103,7 +103,7 @@ duas metades, basta deixá-las lado a lado na lista.
 | Receituário de controle especial | A4 paisagem, duas vias | redesenhado |
 | LME — solicitação de medicamentos | A4 retrato | oficial do SUS, dois modelos |
 | Outros documentos | A5 retrato | redesenhado |
-| FAA — ficha de atendimento ambulatorial | A5 paisagem | redesenhado |
+| FAA — ficha de atendimento ambulatorial | A5 paisagem | redesenhado, fiel ao impresso |
 
 Campos preenchidos em cada um:
 
@@ -113,6 +113,12 @@ Campos preenchidos em cada um:
 - **Receituário simples** — nome, data, prontuário e prescrição.
 - **Receituário de controle especial** — paciente (com CPF entre parênteses, se informado), endereço, prescrição e data, iguais nas duas vias.
 - **FAA** — nome, prontuário, data, descrição da patologia, especialidade e as três linhas de retorno (dia, mês, hora, grade, e alta na terceira). Os campos de retorno são texto livre, e ficam em branco se não forem preenchidos — quem completa é o balcão da marcação. O carimbo é sempre à mão.
+
+  O desenho da FAA segue o impresso do hospital de perto — rótulos fora das caixas
+  numa coluna à esquerda, caixas soltas em vez de grade fechada, sem moldura em
+  volta da folha e observações sem caixa. Não é capricho: quem recebe a ficha no
+  balcão reconhece o papel pelo formato, e um layout "melhorado" corre o risco de
+  não ser aceito.
 - **Outros documentos** — folha livre para atestado, declaração, relatório, encaminhamento. Título impresso (opcional, sai em maiúsculas), teor e assinatura. A opção *imprimir nome e registro do prescritor* pode ser desmarcada por quem prefere só carimbar: sai apenas a linha, com a legenda embaixo.
 
 - **LME** — 1 e 2 (fixos), 3.1, 3.2, 4 a 6, 7 e 8 (até seis medicamentos com as quantidades dos seis meses), 9 a 16, 18 a 22. As assinaturas (17 e 23) ficam em branco.

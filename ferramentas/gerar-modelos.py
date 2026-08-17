@@ -420,68 +420,106 @@ OBSERVACOES_FAA = [
 def faa(destino):
     """Ficha de Atendimento Ambulatorial — retorno.
 
-    A grade de datas e o carimbo saem em branco de propósito: quem preenche é o
-    balcão da marcação, com a ficha na mão."""
+    Copiado do impresso do hospital, e a fidelidade aqui é requisito, não
+    capricho: quem recebe a ficha no balcão reconhece o papel pelo desenho. Por
+    isso os rótulos ficam FORA das caixas, numa coluna à esquerda, as caixas são
+    retângulos soltos (não uma grade fechada), não há moldura em volta da folha
+    e as observações saem sem caixa nenhuma — tudo como no original."""
     campos = {}
     c = canvas.Canvas(destino, pagesize=(595, 420))
     f = Folha(c, campos)
-    E, D = 16, 579
-    MEIO = 428          # divisa entre a coluna dos dados e a do carimbo
+    E, D = 18, 577
+    VALOR = 152          # onde começa a coluna das caixas
+    FIM_ESQ = 430        # onde ela termina, à esquerda do carimbo
+    DIR = 442            # coluna da direita: data e carimbo
 
-    f.cabecalho(E, 352, D, 406, 'FICHA DE ATENDIMENTO AMBULATORIAL', 'RETORNO')
+    ROT = 7.5
 
-    f.celula('nome', 'NOME DO USUÁRIO:', E, 328, MEIO, 350)
-    f.celula('data', 'DATA:', MEIO, 328, D, 350)
+    def rotulo(texto, y):
+        f.txt(texto, E + 2, y, ROT)
 
-    f.celula('prontuario', 'PRONTUÁRIO HULW:', E, 304, MEIO, 326)
+    # ------------------------------------------------------------- cabeçalho
+    f.ret(E, 348, 128, 404)
+    f.img('hulw.png', E + 4, 352, 120 - E, 48)
 
-    # carimbo: uma caixa só, alta, do lado direito
-    f.ret(MEIO, 130, D, 326)
-    f.txtc('CARIMBO E ASSINATURA', (MEIO + D) / 2, 314, 7, negrito=True)
-    f.txtc('DO MÉDICO (A)', (MEIO + D) / 2, 305, 7, negrito=True)
+    f.ret(132, 348, 452, 404)
+    f.txtc('FICHA DE ATENDIMENTO AMBULATORIAL', 292, 380, 13, negrito=True)
+    f.txtc('RETORNO', 292, 362, 11.5, negrito=True)
 
-    f.area('patologia', 'DESCRIÇÃO DA PATOLOGIA', E, 250, MEIO, 302)
-    f.celula('especialidade', 'ESPECIALIDADE MÉDICA:', E, 226, MEIO, 248)
+    f.img('hubrasil.png', 458, 358, D - 458, 38)
 
-    # grade de retorno: três consultas, preenchidas à mão no balcão
-    f.ret(E, 130, MEIO, 224)
-    f.txt('TIPO DE ENCAMINHAMENTO', E + 5, 212, 8, negrito=True)
+    # ------------------------------------------------------- dados de topo
+    rotulo('NOME DO USUÁRIO', 328)
+    f.ret(VALOR, 318, FIM_ESQ, 342)
+    campos['nome'] = {'x': VALOR + 5, 'y': 326.0, 'w': FIM_ESQ - VALOR - 10}
 
-    linhas_y = [(184, 206), (158, 180), (132, 154)]
+    f.txt('DATA', DIR, 328, ROT)
+    f.ret(DIR + 30, 318, D, 342)
+    campos['data'] = {'x': DIR + 35, 'y': 326.0, 'w': D - DIR - 40}
+
+    rotulo('PRONTUÁRIO HULW', 296)
+    f.ret(VALOR, 286, FIM_ESQ, 310)
+    campos['prontuario'] = {'x': VALOR + 5, 'y': 294.0, 'w': FIM_ESQ - VALOR - 10}
+
+    # carimbo: rótulo solto e uma caixa alta embaixo, como no impresso
+    f.txtc('CARIMBO E ASSINATURA DO MÉDICO (A)', (DIR + D) / 2, 296, 6.5)
+    f.ret(DIR, 96, D, 288)
+
+    # --------------------------------------------------------------- corpo
+    rotulo('DESCRIÇÃO DA PATOLOGIA', 268)
+    f.ret(VALOR, 212, FIM_ESQ, 278)
+    campos['patologia'] = [VALOR + 5.0, 216.0, FIM_ESQ - 5.0, 272.0]
+
+    rotulo('ESPECIALIDADE MÉDICA', 194)
+    f.ret(VALOR, 176, FIM_ESQ, 204)
+    campos['especialidade'] = {'x': VALOR + 5, 'y': 186.0, 'w': FIM_ESQ - VALOR - 10}
+
+    # ------------------------------------------------- grade de retorno
+    rotulo('TIPO DE ENCAMINHAMENTO', 158)
+    linhas_y = [(140, 164), (110, 134), (80, 104)]
     for i, (y0, y1) in enumerate(linhas_y):
         ultima = i == len(linhas_y) - 1
         colunas = [('dia', 'DIA:'), ('mes', 'MÊS:'), ('hora', 'HORA:'), ('grade', 'GRADE:')]
         if ultima:
             colunas.append(('alta', 'ALTA:'))
-        larg = (MEIO - 10 - E) / len(colunas)
-        for k, (chave, rotulo) in enumerate(colunas):
-            x0 = E + 5 + k * larg
-            f.celula('r%d%s' % (i + 1, chave), rotulo,
-                     x0, y0, x0 + larg - 3, y1, tam_rotulo=7)
+        direita = 438 if ultima else FIM_ESQ
 
-    # observações: texto fixo, quebrado na largura da folha
-    f.ret(E, 58, D, 126)
-    f.txt('OBSERVAÇÕES:', E + 5, 114, 8, negrito=True)
+        # o espaço que sobra depois dos rótulos é dividido igualmente entre as
+        # caixas — com passo fixo, a coluna de rótulo mais longo comeria a sua
+        rotulos_w = sum(f.larg(r, 7) for _, r in colunas)
+        vao = 3.0          # entre rótulo e caixa
+        entre = 7.0        # entre uma coluna e a próxima
+        livre = direita - VALOR - rotulos_w - vao * len(colunas) - entre * (len(colunas) - 1)
+        cxw = livre / len(colunas)
 
-    y = 103
+        base = y0 + (y1 - y0 - 8) / 2 + 1
+        x = VALOR
+        for chave, rot in colunas:
+            f.txt(rot, x, base, 7)
+            cx0 = x + f.larg(rot, 7) + vao
+            f.ret(cx0, y0, cx0 + cxw, y1)
+            campos['r%d%s' % (i + 1, chave)] = {
+                'x': round(cx0 + 3, 1), 'y': round(base, 1), 'w': round(cxw - 6, 1)}
+            x = cx0 + cxw + entre
+
+    # ---------------------------------------------------------- observações
+    f.txt('OBSERVAÇÕES:', E, 66, 8, negrito=True)
+
+    y = 55
     for marca, texto in OBSERVACOES_FAA:
-        recuo = E + 5
         primeira = True
         linha = marca
         for palavra in texto.split():
-            teste = (linha + ' ' + palavra).strip() if linha != marca else marca + palavra
-            if f.larg(teste, 6.8) > D - E - 14:
-                f.txt(linha, recuo if primeira else recuo + f.larg(marca, 6.8), y, 6.8)
-                if primeira:
-                    primeira = False
+            teste = (linha + ' ' + palavra) if linha != marca else marca + palavra
+            if f.larg(teste, 6.5) > D - E - 4:
+                f.txt(linha, E if primeira else E + f.larg(marca, 6.5), y, 6.5)
+                primeira = False
                 linha = palavra
-                y -= 9
+                y -= 8.5
             else:
                 linha = teste
-        f.txt(linha, recuo if primeira else recuo + f.larg(marca, 6.8), y, 6.8)
-        y -= 11
-
-    f.rodape('FAA · Hospital Universitário Lauro Wanderley – UFPB', (E + D) / 2, 44)
+        f.txt(linha, E if primeira else E + f.larg(marca, 6.5), y, 6.5)
+        y -= 10
 
     c.showPage()
     c.save()

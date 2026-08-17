@@ -1,31 +1,35 @@
 /* FAA — Ficha de Atendimento Ambulatorial (retorno), HULW/UFPB.
    Modelo em branco gerado por ferramentas/gerar-modelos.py (A5 paisagem, 595 x 420).
 
-   A grade de dia/mês/hora/grade e o carimbo saem em branco: quem preenche é o
-   balcão da marcação, com a ficha na mão. */
+   O desenho copia o impresso do hospital de perto — rótulos fora das caixas,
+   caixas soltas, sem moldura em volta —, porque quem recebe a ficha no balcão
+   reconhece o papel pelo formato. Ver faa() em ferramentas/gerar-modelos.py.
+
+   A grade de retorno é texto livre e pode sair em branco, para o balcão
+   preencher à mão. O carimbo é sempre manual. */
 
 (function () {
   'use strict';
 
   var C = {
-    nome:          { x: 104.1, y: 336.0, w: 319.9 },
-    data:          { x: 460.6, y: 336.0, w: 114.4 },
-    prontuario:    { x: 106.3, y: 312.0, w: 317.7 },
-    especialidade: { x: 124.1, y: 234.0, w: 299.9 }
+    nome:          { x: 157, y: 326.0, w: 268 },
+    data:          { x: 477, y: 326.0, w: 95 },
+    prontuario:    { x: 157, y: 294.0, w: 268 },
+    especialidade: { x: 157, y: 186.0, w: 268 }
   };
 
-  var PATOLOGIA = [21, 254, 423, 287];
+  var PATOLOGIA = [157.0, 216.0, 425.0, 272.0];
 
   /* Grade de retorno: três consultas. Tudo texto livre — "15", "quinze",
      "3ª feira", "manhã" — porque é assim que é preenchido à mão no balcão. */
   var RETORNO = [
-    { dia: { x: 43.6, y: 192.0, w: 70.9 }, mes: { x: 147.6, y: 192.0, w: 67.4 },
-      hora: { x: 253.2, y: 192.0, w: 62.3 }, grade: { x: 358.3, y: 192.0, w: 57.7 } },
-    { dia: { x: 43.6, y: 166.0, w: 70.9 }, mes: { x: 147.6, y: 166.0, w: 67.4 },
-      hora: { x: 253.2, y: 166.0, w: 62.3 }, grade: { x: 358.3, y: 166.0, w: 57.7 } },
-    { dia: { x: 43.6, y: 140.0, w: 50.8 }, mes: { x: 127.5, y: 140.0, w: 47.3 },
-      hora: { x: 213.0, y: 140.0, w: 42.2 }, grade: { x: 298.0, y: 140.0, w: 37.6 },
-      alta: { x: 371.1, y: 140.0, w: 44.9 } }
+    { dia: { x: 171.6, y: 149.0, w: 35.3 }, mes: { x: 240.0, y: 149.0, w: 35.3 },
+      hora: { x: 313.5, y: 149.0, w: 35.3 }, grade: { x: 391.7, y: 149.0, w: 35.3 } },
+    { dia: { x: 171.6, y: 119.0, w: 35.3 }, mes: { x: 240.0, y: 119.0, w: 35.3 },
+      hora: { x: 313.5, y: 119.0, w: 35.3 }, grade: { x: 391.7, y: 119.0, w: 35.3 } },
+    { dia: { x: 171.6, y: 89.0, w: 22.8 }, mes: { x: 227.5, y: 89.0, w: 22.8 },
+      hora: { x: 288.4, y: 89.0, w: 22.8 }, grade: { x: 354.0, y: 89.0, w: 22.8 },
+      alta: { x: 412.2, y: 89.0, w: 22.8 } }
   ];
 
   var COLUNAS = ['dia', 'mes', 'hora', 'grade'];
